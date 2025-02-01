@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import '../screens/sign_up.dart';
 // import 'home_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -53,8 +55,8 @@ class LoginPage extends StatelessWidget {
                       color: Colors.black),
                 ),
               ),
-              myTextFiels("Email", "Enter your email"),
-              myTextFiels("Password", "Enter your password"),
+              myTextFields("Email", "Enter your email"),
+              myTextFields("Password", "Enter your password"),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -165,7 +167,7 @@ class LoginPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
-                        children: const [
+                        children: [
                           TextSpan(
                             text: " Sign up",
                             style: TextStyle(
@@ -173,6 +175,13 @@ class LoginPage extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => SignUpPage()),
+                                );
+                              },
                           ),
                         ],
                       ),
@@ -189,7 +198,7 @@ class LoginPage extends StatelessWidget {
   }
 
   // container for email and password input fields
-  Container myTextFiels(String label, String hint) {
+  Container myTextFields(String label, String hint) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 25,
