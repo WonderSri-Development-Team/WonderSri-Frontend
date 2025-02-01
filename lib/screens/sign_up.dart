@@ -1,10 +1,9 @@
+
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
-import '../screens/sign_up.dart';
 // import 'home_page.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +31,7 @@ class LoginPage extends StatelessWidget {
               ),
               // welcome text
               SizedBox(
-                height: size.height * 0.03,
+                height: size.height * 0.02,
               ),
               Text(
                 "Welcome to WonderSri !\nYour personal e-tour guide.",
@@ -44,41 +43,26 @@ class LoginPage extends StatelessWidget {
                     fontWeight: FontWeight.w800),
               ),
               // email password input area
-              SizedBox(height: size.height * 0.06),
+              SizedBox(height: size.height * 0.03),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
-                  "Login to your account",
+                  "Create your account",
                   style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 17,
                       color: Colors.black),
                 ),
               ),
+              myTextFields("User Name", "Enter a user name"),
               myTextFields("Email", "Enter your email"),
               myTextFields("Password", "Enter your password"),
+              myTextFields("Confirm Password", "Re-enter your password"),
+              SizedBox(height: size.height*0.01),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    SizedBox(height: 2),
-                    // forgot password
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // forgot password logic
-                        },
-                        child: Text(
-                          "Forgot password?",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Colors.black45),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
                     // sign in Button
                     ElevatedButton(
                       onPressed: () {
@@ -96,11 +80,11 @@ class LoginPage extends StatelessWidget {
                         minimumSize: const Size.fromHeight(50),
                       ),
                       child: const Text(
-                        "Sign in",
+                        "Sign up",
                         style: TextStyle(fontSize: 22, color: Colors.white),
                       ),
                     ),
-                    SizedBox(height: size.height * 0.03),
+                    SizedBox(height: size.height * 0.02),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -110,7 +94,7 @@ class LoginPage extends StatelessWidget {
                           color: Colors.black45,
                         ),
                         Text(
-                          "  Or Sign in with  ",
+                          "  Or Sign up with  ",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.black45,
@@ -145,7 +129,7 @@ class LoginPage extends StatelessWidget {
                               ),
                               Spacer(),
                               Text(
-                                "Sign in with Google", // text
+                                "Sign up with Google", // text
                                 style: TextStyle(
                                   color: Colors.black45,
                                   fontWeight: FontWeight.bold,
@@ -157,34 +141,6 @@ class LoginPage extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
-                    SizedBox(height: size.height * 0.02),
-                    Text.rich(
-                      TextSpan(
-                        text: "Don't have an account?",
-                        style: TextStyle(
-                          color: Colors.black45,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: " Sign up",
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => SignUpPage()),
-                                );
-                              },
-                          ),
-                        ],
-                      ),
                     ),
                     SizedBox(height: size.height * 0.02),
                   ],
