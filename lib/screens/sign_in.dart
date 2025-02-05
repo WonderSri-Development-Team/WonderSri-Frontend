@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../screens/sign_up.dart';
-// import 'home_page.dart';
+import 'home_page.dart';
+import 'package:frontend/service/navigation_controller.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -82,10 +83,10 @@ class LoginPage extends StatelessWidget {
                     // sign in Button
                     ElevatedButton(
                       onPressed: () {
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => HomePage()),
-                        // );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => NavController()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 10, // Adds a shadow
