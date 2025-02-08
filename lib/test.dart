@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../screens/sign_up.dart';
-import 'home_page.dart';
+// import 'home_page.dart';
 import 'package:frontend/service/navigation_controller.dart';
 import 'package:frontend/service/api_service.dart';
 
@@ -63,91 +63,73 @@ class _LoginPageState extends State<LoginPage>{
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              SizedBox(
-                height: size.height * 0.07,
-              ),
-              // logo
-              Image.asset(
-                "assets/images/logo-blue.png", //change the image
-                height: size.height *
-                    0.25, // Adjust size proportionally to screen height
-                fit: BoxFit.contain,
-              ),
-              // welcome text
-              SizedBox(
-                height: size.height * 0.03,
-              ),
-              Text(
-                "Welcome to WonderSri !\nYour personal e-tour guide.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black38,
-                    height: 1.2,
-                    fontWeight: FontWeight.w800),
-              ),
-              // email password input area
-              SizedBox(height: size.height * 0.04),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 25),
-                child: Text(
-                  "Login to your account",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17,
-                      color: Colors.black),
+          child: Center(
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: size.height,
                 ),
-              ),
-              myTextFields(emailController, "Email", "Enter your email"),
-              myTextFields(passwordController, "Password", "Enter your password",isPassword:true),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: 2),
-                    // forgot password
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // forgot password logic
-                        },
-                        child: Text(
-                          "Forgot password?",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Colors.black45),
+                    SizedBox(height: size.height * 0.05),
+
+                    Image.asset(
+                      "assets/images/logo-blue.png",
+                      height: 100, // Fixed logo size
+                      fit: BoxFit.contain,
+                    ),
+
+                    SizedBox(height: size.height * 0.03),
+
+                    Text(
+                      "Welcome to WonderSri!\nYour personal e-tour guide.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black38,
+                        height: 1.2,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+
+                    SizedBox(height: size.height * 0.06),
+
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 25),
+                      child: Text(
+                        "Login to your account",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 17,
+                          color: Colors.black,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    // sign in Button
+
+                    myTextFields(emailController, "Email", "Enter your email"),
+                    myTextFields(passwordController, "Password", "Enter your password", isPassword: true),
+
+                    SizedBox(height: size.height * 0.02),
+
                     ElevatedButton(
-                      // onPressed: isLoading ? null : _login,
                       onPressed: () {
-                        // Navigate to SecondPage when button is clicked
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => NavController()),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        elevation: 10, // Adds a shadow
+                        elevation: 10,
                         backgroundColor: Color(0xFF2D46B9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        minimumSize: Size(250, 50), // Fixed button size
                       ),
-                      child: const Text(
-                        "Sign in",
-                        style: TextStyle(fontSize: 22, color: Colors.white),
-                      ),
+                      child: Text("Sign in", style: TextStyle(fontSize: 22, color: Colors.white)),
                     ),
+
                     SizedBox(height: size.height * 0.02),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -170,46 +152,40 @@ class _LoginPageState extends State<LoginPage>{
                         ),
                       ],
                     ),
-                    // sign in options
+
                     SizedBox(height: size.height * 0.02),
+
                     ElevatedButton(
-                      // onPressed: isLoading ? null : _login,
                       onPressed: () {
-                        // Navigate to SecondPage when button is clicked
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => NavController()),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        elevation: 10, // Adds a shadow
-                        // backgroundColor: Color(tr),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        minimumSize: const Size.fromHeight(50),
+                        elevation: 10,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        minimumSize: Size(250, 50), // Fixed button size
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset(
-                            "assets/images/google.png", // Google icon
-                            height: 33,
-                          ),
-                          Spacer(),
+                          Image.asset("assets/images/google.png", height: 30),
+                          SizedBox(width: 10),
                           Text(
-                            "Sign in with Google", // text
+                            "Sign in with Google",
                             style: TextStyle(
                               color: Colors.black45,
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                           ),
-                          Spacer(),
                         ],
                       ),
-
                     ),
+
                     SizedBox(height: size.height * 0.02),
+
                     Text.rich(
                       TextSpan(
                         text: "Don't have an account?",
@@ -237,16 +213,18 @@ class _LoginPageState extends State<LoginPage>{
                         ],
                       ),
                     ),
-                    // SizedBox(height: size.height * 0.02),
+
+                    SizedBox(height: size.height * 0.02),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+
 
   // container for email and password input fields
   Container myTextFields(TextEditingController controller, String label, String hint,{bool isPassword = false}) {
