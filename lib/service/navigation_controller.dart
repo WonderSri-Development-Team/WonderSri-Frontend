@@ -18,7 +18,9 @@ class _NavControllerState extends State<NavController>{
   final List<Widget> _screens = [
     HomePage(),
     MapScreen(),
+    ExplorerPage(),
     SettingsPage(),
+
 
   ];
 
