@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/user_profile/EditProfilePage.dart';
+import 'package:frontend/screens/user_profile/changePassword_screen.dart';
+
 
 import 'UserModel.dart';
 
@@ -80,7 +82,21 @@ class SettingsPage extends StatelessWidget {
             SizedBox(height: 25.0),
             buildSettingTitle('Account Settings'),
             buildSettingItem('Personal Information', Icons.person),
-            buildSettingItem('Password and Security', Icons.lock),
+            
+            //buildSettingItem('Password and Security', Icons.lock),
+            buildSettingItem(
+ 
+  'Password and Security',
+  Icons.lock,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ChangepasswordScreen()),
+    );
+  },
+),
+            
+            
             buildSettingItem('Payments method ', Icons.payment),
             buildSettingItem('Notification', Icons.notifications),
             SizedBox(height: 25.0),
@@ -132,7 +148,7 @@ Widget buildSettingTitle(String title) {
 }
 
 //create setting item
-Widget buildSettingItem(String title, IconData icon) {
+Widget buildSettingItem(String title, IconData icon, {VoidCallback? onTap}) {
   return ListTile(
     leading: Icon(
       icon,
@@ -150,8 +166,6 @@ Widget buildSettingItem(String title, IconData icon) {
       size: 16.0,
       color: Colors.grey,
     ),
-    onTap: () {
-      // Handle tap on setting item
-    },
+    onTap: onTap,
   );
 }
