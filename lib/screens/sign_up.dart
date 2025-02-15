@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-// import 'home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'home_page.dart';
+import 'sign_in.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -40,7 +42,7 @@ class _SignUpPageState extends State<SignUpPage>{
 
       // Send ID Token to your backend
       final response = await http.post(
-        Uri.parse('https://wondersri-backend.onrender.com/auth/google/'), // Change this to match your backend
+        Uri.parse('https://wondersri-backend.onrender.com/auth/google-login/'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_token": idToken}),
       );
@@ -48,7 +50,17 @@ class _SignUpPageState extends State<SignUpPage>{
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         print("User authenticated: ${data['token']}");
-        // Handle successful login (e.g., navigate to home screen, save token, etc.)
+
+        // Store the authentication token
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', data['token']);
+
+        // Navigate to the home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+        
       } else {
         print("Failed to authenticate: ${response.body}");
       }
@@ -58,7 +70,8 @@ class _SignUpPageState extends State<SignUpPage>{
   }
 
   Future<void> _signUp() async {
-    final String apiUrl = "https://wondersri-backend.onrender.com/auth/google-login/";
+    // backend URL for normal signup
+    final String apiUrl = "https://wondersri-backend.onrender.com/auth/signup/";
 
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -73,30 +86,43 @@ class _SignUpPageState extends State<SignUpPage>{
     );
 
     if (response.statusCode == 201) {
-      // Signup successful
-      _showDialog("Success", "Signup successful! Please verify your email.");
+      _showDialog("Success", "Signup successful! Please verify your email.", () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) =>
+              LoginPage()),
+        );
+      });
     } else {
-      // Signup failed, show error message
+
       final Map<String, dynamic> responseData = jsonDecode(response.body);
       _showDialog("Error", responseData["error"] ?? "Signup failed.");
     }
   }
 
-  void _showDialog(String title, String message) {
+  void _showDialog(String title, String message, [VoidCallback? onOkPressed]) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("OK"),
-          ),
-        ],
-      ),
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onOkPressed != null) {
+                  onOkPressed();
+                }
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
