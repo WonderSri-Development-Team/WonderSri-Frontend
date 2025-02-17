@@ -13,18 +13,19 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
   bool _isNewPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
-
-   // Password requirements checklist
+  // Password requirements checklist
   bool hashCharacters = false;
   bool hasUppercase = false;
   bool hasNumber = false;
   bool hasSpecialChar = false;
 
-  void _updatePasswordStrength (String password){
+  void _updatePasswordStrength(String password) {
     setState(() {
       hashCharacters = password.length >= 8;
       hasUppercase = password.contains(RegExp(r'[A-Z]'));
@@ -63,6 +64,7 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +83,8 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Current Password Field
-              Text('Current Password', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Current Password',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               TextFormField(
                 controller: _currentPasswordController,
@@ -91,7 +94,9 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
                   border: OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isCurrentPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isCurrentPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -111,7 +116,8 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
               SizedBox(height: 20),
 
               // New Password Field
-              Text('New Password', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('New Password',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               TextFormField(
                 controller: _newPasswordController,
@@ -122,7 +128,9 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
                   border: OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isNewPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isNewPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -135,7 +143,10 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a new password';
                   }
-                  if (!hashCharacters || !hasUppercase || !hasNumber || !hasSpecialChar) {
+                  if (!hashCharacters ||
+                      !hasUppercase ||
+                      !hasNumber ||
+                      !hasSpecialChar) {
                     return 'Password does not meet requirements';
                   }
                   return null;
@@ -144,7 +155,8 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
               SizedBox(height: 20),
 
               // Confirm Password Field
-              Text('Confirm New Password', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Confirm New Password',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               TextFormField(
                 controller: _confirmPasswordController,
@@ -154,7 +166,9 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
                   border: OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isConfirmPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -263,7 +277,7 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
                   ),
                   child: Text(
                     'Update Password',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),
@@ -329,9 +343,4 @@ class SecurityTipRow extends StatelessWidget {
       ),
     );
   }
-
-
-
-
-  
 }
