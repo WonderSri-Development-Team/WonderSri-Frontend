@@ -76,7 +76,7 @@ class _PasswordChangeScreenState extends State<ChangepasswordScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(28.0),
         child: Form(
           key: _formKey,
           child: Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/helpCenter.dart';
 import 'package:frontend/screens/user_profile/EditProfilePage.dart';
 import 'package:frontend/screens/user_profile/changePassword_screen.dart';
 
@@ -13,7 +14,7 @@ class SettingsPage extends StatelessWidget {
         backgroundColor: Color(0xFF2D46B9),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(25),
+        padding: EdgeInsets.all(28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -105,7 +106,19 @@ class SettingsPage extends StatelessWidget {
             buildSettingItem('Currency', Icons.attach_money),
             SizedBox(height: 25.0),
             buildSettingTitle('Support & Help'),
-            buildSettingItem('Help Center', Icons.help),
+
+            buildSettingItem(
+              'Help Center',
+              Icons.help,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HelpCenter()), // Navigate to HelpCenter
+                );
+              },
+            ),
             buildSettingItem('Contact Support', Icons.contact_support),
             buildSettingItem('Privacy Policy', Icons.privacy_tip),
             SizedBox(height: 24.0),
