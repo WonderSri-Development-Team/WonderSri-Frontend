@@ -81,7 +81,10 @@ class SettingsPage extends StatelessWidget {
             ),
             SizedBox(height: 25.0),
             buildSettingTitle('Account Settings'),
-            buildSettingItem('Personal Information', Icons.person),
+            buildSettingItem(
+              'Personal Information',
+              Icons.person,
+            ),
 
             //buildSettingItem('Password and Security', Icons.lock),
             buildSettingItem(
@@ -119,8 +122,30 @@ class SettingsPage extends StatelessWidget {
                 );
               },
             ),
-            buildSettingItem('Contact Support', Icons.contact_support),
-            buildSettingItem('Privacy Policy', Icons.privacy_tip),
+            buildSettingItem(
+              'Contact Support',
+              Icons.contact_support,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HelpCenter()), // Navigate to HelpCenter
+                );
+              },
+            ),
+            buildSettingItem(
+              'Privacy Policy',
+              Icons.privacy_tip,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HelpCenter()), // Navigate to HelpCenter
+                );
+              },
+            ),
             SizedBox(height: 24.0),
             buildSettingTitle('App Information'),
             buildSettingItem('About Us', Icons.info),
