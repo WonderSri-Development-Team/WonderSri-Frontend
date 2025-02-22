@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/helpCenter.dart';
 import 'package:frontend/screens/user_profile/EditProfilePage.dart';
+import 'package:frontend/screens/user_profile/changePassword_screen.dart';
 
 import 'UserModel.dart';
 
@@ -12,7 +14,7 @@ class SettingsPage extends StatelessWidget {
         backgroundColor: Color(0xFF2D46B9),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(25),
+        padding: EdgeInsets.all(28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -79,8 +81,24 @@ class SettingsPage extends StatelessWidget {
             ),
             SizedBox(height: 25.0),
             buildSettingTitle('Account Settings'),
-            buildSettingItem('Personal Information', Icons.person),
-            buildSettingItem('Password and Security', Icons.lock),
+            buildSettingItem(
+              'Personal Information',
+              Icons.person,
+            ),
+
+            //buildSettingItem('Password and Security', Icons.lock),
+            buildSettingItem(
+              'Password and Security',
+              Icons.lock,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ChangepasswordScreen()),
+                );
+              },
+            ),
+
             buildSettingItem('Payments method ', Icons.payment),
             buildSettingItem('Notification', Icons.notifications),
             SizedBox(height: 25.0),
@@ -91,9 +109,43 @@ class SettingsPage extends StatelessWidget {
             buildSettingItem('Currency', Icons.attach_money),
             SizedBox(height: 25.0),
             buildSettingTitle('Support & Help'),
-            buildSettingItem('Help Center', Icons.help),
-            buildSettingItem('Contact Support', Icons.contact_support),
-            buildSettingItem('Privacy Policy', Icons.privacy_tip),
+
+            buildSettingItem(
+              'Help Center',
+              Icons.help,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HelpCenter()), // Navigate to HelpCenter
+                );
+              },
+            ),
+            buildSettingItem(
+              'Contact Support',
+              Icons.contact_support,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HelpCenter()), // Navigate to HelpCenter
+                );
+              },
+            ),
+            buildSettingItem(
+              'Privacy Policy',
+              Icons.privacy_tip,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HelpCenter()), // Navigate to HelpCenter
+                );
+              },
+            ),
             SizedBox(height: 24.0),
             buildSettingTitle('App Information'),
             buildSettingItem('About Us', Icons.info),
@@ -132,7 +184,7 @@ Widget buildSettingTitle(String title) {
 }
 
 //create setting item
-Widget buildSettingItem(String title, IconData icon) {
+Widget buildSettingItem(String title, IconData icon, {VoidCallback? onTap}) {
   return ListTile(
     leading: Icon(
       icon,
@@ -150,8 +202,6 @@ Widget buildSettingItem(String title, IconData icon) {
       size: 16.0,
       color: Colors.grey,
     ),
-    onTap: () {
-      // Handle tap on setting item
-    },
+    onTap: onTap,
   );
 }
