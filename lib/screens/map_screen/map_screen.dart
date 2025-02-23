@@ -1,23 +1,11 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class MapScreen extends StatefulWidget{
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MapScreen(),
-    );
-  }
+  _MapScreenState createState() => _MapScreenState();
 }
 
-class MapScreen extends StatelessWidget {
+class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +14,7 @@ class MapScreen extends StatelessWidget {
       ),
       body: Center(
         child: Text(
-          'Map screen',
+          'Map Screen',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),

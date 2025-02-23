@@ -44,13 +44,6 @@ dependencies:
   google_sign_in: ^6.2.2
   shared_preferences: ^2.5.2
 
-  flutter_map: ^8.0.0
-  latlong2: ^0.9.1
-  geolocator: ^13.0.2
-  permission_handler: ^11.3.1
-  geocoding: ^2.1.1
-
-
 flutter_launcher_icons:
   android: true
   ios: true
