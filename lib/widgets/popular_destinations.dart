@@ -7,7 +7,7 @@ class PopularDestinationsSection extends StatelessWidget {
   static final List<Map<String, dynamic>> destinations = [
     {
       'name': 'Galle Fort',
-      'image': 'assets/images/Galle_Fort.jpg',
+      'image': 'assets/images/GalleFort_1.jpg',
       'rating': 4.8,
       'description':
           'A UNESCO World Heritage site, Galle Fort is a historic Dutch colonial fortress featuring charming streets, boutique shops, and centuries of rich history along Sri Lanka\'s southern coast.',
@@ -107,77 +107,80 @@ class DestinationCard extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          contentPadding: EdgeInsets.zero, // Remove default padding
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Stack(
-                children: [
-                  // Image and content
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(20),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  children: [
+                    // Image and content
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                          /*child: Image.asset(
+                            image,
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),*/
                         ),
-                        child: Image.asset(
-                          image,
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              name,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                name,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.star, color: Colors.amber),
-                                Text(' $rating'),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              description,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.star, color: Colors.amber),
+                                  Text(' $rating'),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                description,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  // Back button
-                  Positioned(
-                    top: 8,
-                    left: 2,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.black,
+                      ],
+                    ),
+                    // Back button
+                    Positioned(
+                      top: 8,
+                      left: 1,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
