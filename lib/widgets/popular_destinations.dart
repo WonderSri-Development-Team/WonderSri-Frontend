@@ -7,28 +7,28 @@ class PopularDestinationsSection extends StatelessWidget {
   static final List<Map<String, dynamic>> destinations = [
     {
       'name': 'Galle Fort',
-      'image': 'assets/images/galle_fort.jpg',
+      'image': 'assets/images/Galle_Fort.jpg',
       'rating': 4.8,
       'description':
           'A UNESCO World Heritage site, Galle Fort is a historic Dutch colonial fortress featuring charming streets, boutique shops, and centuries of rich history along Sri Lanka\'s southern coast.',
     },
     {
       'name': 'Mirissa Beach',
-      'image': 'assets/images/mirissa_beach.jpg',
+      'image': 'assets/images/mirissa.jpg',
       'rating': 4.7,
       'description':
           'Famous for whale watching and stunning sunsets, Mirissa Beach offers golden sands, palm trees, and excellent surfing conditions in a paradise-like setting.',
     },
     {
       'name': 'Hikkaduwa Beach',
-      'image': 'assets/images/hikkaduwa_beach.jpg',
+      'image': 'assets/images/hikkaduwa-beach.jpg',
       'rating': 4.6,
       'description':
           'A vibrant coastal town known for its coral sanctuary, surfing spots, and beach parties. Perfect for both relaxation and water sports enthusiasts.',
     },
     {
       'name': 'Bentota Beach',
-      'image': 'assets/images/bentota_beach.jpg',
+      'image': 'assets/images/benthota.jpg',
       'rating': 4.5,
       'description':
           'A pristine stretch of golden sand famous for water sports, luxury resorts, and the nearby Bentota River. Ideal for both adventure seekers and those looking for relaxation.',

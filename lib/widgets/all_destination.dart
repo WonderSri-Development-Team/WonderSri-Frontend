@@ -20,9 +20,9 @@ class AllDestinationsScreen extends StatelessWidget {
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        itemCount: PopularDestination.destinations.length,
+        itemCount: PopularDestinationsSection.destinations.length,
         itemBuilder: (context, index) {
-          final destination = PopularDestination.destinations[index];
+          final destination = PopularDestinationsSection.destinations[index];
           return DestinationGridCard(
             name: destination['name'],
             image: destination['image'],
