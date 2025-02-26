@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MapScreen extends StatefulWidget{
+  const MapScreen({super.key});
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
