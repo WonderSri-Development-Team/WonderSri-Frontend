@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../screens/sign_up.dart';
-import 'home_page.dart';
 import 'package:frontend/service/navigation_controller.dart';
 import 'package:frontend/service/api_service.dart';
 
