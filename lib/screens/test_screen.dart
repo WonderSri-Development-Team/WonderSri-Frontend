@@ -1,29 +1,27 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/service/firebase/firebase_notification.dart';
 
-class TestScreen extends StatelessWidget {
+class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Test Screen'),
-      ),
-      body: Center(
-        child: ElevatedButton(onPressed: () async {
-          await getToken();
-        },
-          child: Text('Get FCM Token'),
-        ),
-      ),
-    );
+  State<TestScreen> createState() => _TestScreenState();
+}
+
+class _TestScreenState extends State<TestScreen> {
+  final TextEditingController titleController = TextEditingController();
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermission();
+    getToken();
   }
 
-
-  Future<void> getToken() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-
+  Future<void> requestPermission() async {
     // Request permission for iOS (optional)
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
@@ -34,14 +32,48 @@ class TestScreen extends StatelessWidget {
       provisional: false,
       sound: true,
     );
+  }
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      // Get the token
-      String? token = await messaging.getToken();
-      print("FCM Token: $token");
-      // You can send this token to your server to register the device
-    } else {
-      print('User declined or has not accepted permission');
-    }
+  Future<void> getToken() async {
+    // Ensure Firebase is initialized
+    await Firebase.initializeApp();
+    await messaging.getInitialMessage();
+
+    // Get the token
+    String? token = await messaging.getToken();
+    print("FCM Token: $token");
+    // You can send this token to your server to register the device
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Test Screen'),
+      ),
+      body: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                await getToken();
+              },
+              child: const Text('Get FCM Token'),
+            ),
+            const SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: () {
+                FirebaseNotification().showNotification(
+                  title: "Title",
+                  body: "Body",
+                );
+              },
+              child: const Text("Show Notification"),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

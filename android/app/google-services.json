@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "432827058290",
-    "project_id": "test-project-3a6f6",
-    "storage_bucket": "test-project-3a6f6.firebasestorage.app"
+    "project_number": "484578026292",
+    "project_id": "wondersri-98260",
+    "storage_bucket": "wondersri-98260.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:432827058290:android:8b2a4f7a702bd4de72daeb",
+        "mobilesdk_app_id": "1:484578026292:android:a60901f6bedc16b3453b61",
         "android_client_info": {
-          "package_name": "com.example.frontend"
+          "package_name": "com.wondersri"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAyAjnWxdoXR6DPmku2RazeOTX5t2W39IA"
+          "current_key": "AIzaSyDKKDL84kCAjoFfvT2drzEaqoVATp3WJh4"
         }
       ],
       "services": {
