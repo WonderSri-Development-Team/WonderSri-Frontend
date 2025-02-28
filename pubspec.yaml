@@ -50,9 +50,7 @@ dependencies:
 
   google_sign_in: ^6.2.2
   shared_preferences: ^2.5.2
-  google_maps_flutter: ^2.2.0
-  geolocator: ^10.0.0
-  flutter_dotenv: ^5.2.1
+
 
 
 flutter_launcher_icons:
