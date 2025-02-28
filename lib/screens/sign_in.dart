@@ -1,9 +1,16 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../screens/sign_up.dart';
 import 'package:frontend/service/navigation_controller.dart';
 import 'package:frontend/service/api_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -32,14 +39,16 @@ class _LoginPageState extends State<LoginPage>{
         passwordController.text,
       );
 
-      // Save token if needed (e.g., SharedPreferences)
+      print("Login response: $response");
 
-      // Navigate to home page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => NavController()),
-      );
+      if (response.isNotEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NavController()),
+        );
+      }
     } catch (error) {
+      print("Login error: $error");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login failed: ${error.toString()}")),
       );
@@ -47,6 +56,58 @@ class _LoginPageState extends State<LoginPage>{
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+  );
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return; // User canceled sign-in.
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw Exception("Failed to get Google ID Token");
+      }
+
+      print("Google ID Token: $idToken");
+
+      // Send ID Token to your backend
+      final response = await http.post(
+        Uri.parse('https://wondersri-backend.onrender.com/auth/google-login/'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"id_token": idToken}),
+      );
+
+      print("Google Sign-In Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("User authenticated: ${data['token']}");
+
+        // Store the authentication token
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', data['token']);
+
+        // Navigate to the home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NavController()),
+        );
+
+      } else {
+        print("Failed to authenticate: ${response.body}");
+      }
+    } catch (error) {
+      print("Google Sign-In error: $error");
     }
   }
 
@@ -130,15 +191,7 @@ class _LoginPageState extends State<LoginPage>{
 
                         // sign in Button
                         ElevatedButton(
-                          // onPressed: isLoading ? null : _login,
-                          onPressed: () {
-                            // Navigate to SecondPage when button is clicked
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NavController()),
-                            );
-                          },
+                          onPressed: isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
                             elevation: 10, // Adds a shadow
                             backgroundColor: Color(0xFF2D46B9),
@@ -182,15 +235,7 @@ class _LoginPageState extends State<LoginPage>{
                         SizedBox(height: size.height * 0.02),
 
                         ElevatedButton(
-                          // onPressed: isLoading ? null : _login,
-                          onPressed: () {
-                            // Navigate to SecondPage when button is clicked
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NavController()),
-                            );
-                          },
+                          onPressed: _handleGoogleSignIn,
                           style: ElevatedButton.styleFrom(
                             elevation: 10, // Adds a shadow
                             // backgroundColor: Color(tr),
