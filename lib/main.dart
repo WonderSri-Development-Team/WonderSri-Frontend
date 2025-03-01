@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/screens/test_screen.dart';
 import 'package:frontend/service/firebase/firebase_notification.dart';
+import 'firebase_options.dart';
 import './screens/sign_in.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  FirebaseNotification().initNotification();
+  await Firebase.initializeApp(
+    name: "WonderSri",
+    options: const FirebaseOptions(
+        apiKey: "AIzaSyDKKDL84kCAjoFfvT2drzEaqoVATp3WJh4",
+        appId: "1:484578026292:android:a60901f6bedc16b3453b61",
+        projectId: "wondersri-98260",
+        messagingSenderId: "484578026292"),
+  );
 
+  NotificationService().initNotification();
   runApp(const MyApp());
 }
 
@@ -29,8 +38,6 @@ class MyApp extends StatelessWidget {
 }
 
 Future<void> initializeDefault() async {
-  FirebaseApp app = await Firebase.initializeApp(
-    // options: DefaultFirebaseOptions.currentPlatform,
-  );
+  FirebaseApp app = Firebase.app("WonderSri");
   print("Initialized default app $app");
 }

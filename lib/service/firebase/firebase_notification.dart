@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class FirebaseNotification {
+class NotificationService {
   int id = 0;
-
+  final firebaseMessaging = FirebaseMessaging.instance;
   final notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   final bool _isInitialized = false;
@@ -15,25 +16,42 @@ class FirebaseNotification {
   Future<void> initNotification() async {
     if (_isInitialized) return; //prevent re-initialization
 
-    //prepare android init settings
-    const initSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher.png');
-
-    //prepare ios init settings
-    const initSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+    NotificationSettings settings = await firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
     );
 
-    //init settings
-    const initSettings = InitializationSettings(
-      android: initSettingsAndroid,
-      iOS: initSettingsIOS,
-    );
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print("User granted permission");
 
-    // initialize the plugin
-    await notificationsPlugin.initialize(initSettings);
+      //prepare android init settings
+      const initSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher.png');
+
+      //prepare ios init settings
+      const initSettingsIOS = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
+
+      //init settings
+      const initSettings = InitializationSettings(
+        android: initSettingsAndroid,
+        iOS: initSettingsIOS,
+      );
+
+      // initialize the plugin
+      await notificationsPlugin.initialize(initSettings);
+    }
+
+    // get FCM token
+    String? token = await firebaseMessaging.getToken();
+    if (token != null){
+      print('FCM Token: $token');
+
+    }
   }
 
   // NOTIFICATION DETAILS
