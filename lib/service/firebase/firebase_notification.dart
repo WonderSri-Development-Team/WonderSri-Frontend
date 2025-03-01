@@ -6,9 +6,17 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class NotificationService {
   int id = 0;
   final firebaseMessaging = FirebaseMessaging.instance;
-  final notificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  final bool _isInitialized = false;
+  static const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel',
+    'High Importance Notifications',
+    description: 'This channel is used for important notifications.',
+    importance: Importance.high,
+  );
+
+  final flutterNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
 
@@ -26,7 +34,7 @@ class NotificationService {
       print("User granted permission");
 
       //prepare android init settings
-      const initSettingsAndroid =
+      const AndroidInitializationSettings initSettingsAndroid =
           AndroidInitializationSettings('@mipmap/ic_launcher.png');
 
       //prepare ios init settings
@@ -43,14 +51,21 @@ class NotificationService {
       );
 
       // initialize the plugin
-      await notificationsPlugin.initialize(initSettings);
+      await flutterNotificationsPlugin.initialize(initSettings);
+
+      // create android notification channel
+      await flutterNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+
+      _isInitialized = true;
     }
 
     // get FCM token
     String? token = await firebaseMessaging.getToken();
-    if (token != null){
+    if (token != null) {
       print('FCM Token: $token');
-
     }
   }
 
@@ -72,8 +87,8 @@ class NotificationService {
     String? title,
     String? body,
   }) async {
-    return notificationsPlugin.show(
-        id, title, body, const NotificationDetails());
+    return flutterNotificationsPlugin.show(
+        id, title, body, notificationDetails());
   }
 
   // ON NOTIFICATION TAP

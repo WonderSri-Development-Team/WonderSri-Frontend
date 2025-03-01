@@ -37,7 +37,6 @@ class _TestScreenState extends State<TestScreen> {
   Future<void> getToken() async {
     // Ensure Firebase is initialized
     await Firebase.initializeApp();
-    await messaging.getInitialMessage();
 
     // Get the token
     String? token = await messaging.getToken();
