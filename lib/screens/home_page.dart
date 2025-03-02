@@ -1,4 +1,3 @@
-
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/popular_destinations.dart';
@@ -6,6 +5,8 @@ import 'package:frontend/widgets/popular_destinations.dart';
 import 'package:frontend/widgets/quick_bokking.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -32,7 +33,7 @@ class _HomeScreenState extends State<HomePage> {
               child: SearchBar(
                 hintText: 'Search for hotels, activities, or places',
                 leading: const Icon(Icons.search),
-                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
                   EdgeInsets.symmetric(horizontal: 16.0),
                 ),
               ),
