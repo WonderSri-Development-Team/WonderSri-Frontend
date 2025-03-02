@@ -21,7 +21,7 @@ class PopularDestinationsSection extends StatelessWidget {
     },
     {
       'name': 'Sigiriya',
-      'image': 'assets/images/sigiriya.jpg',
+      'image': 'assets/images/sigiri.jpg',
       'rating': 4.9,
       'description':
           'Known as the "Lion Rock," this ancient rock fortress features stunning frescoes, water gardens, and panoramic views. A UNESCO World Heritage site dating back to the 5th century, it\'s one of Sri Lanka\'s most iconic landmarks.',
