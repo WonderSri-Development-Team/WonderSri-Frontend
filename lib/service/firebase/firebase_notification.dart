@@ -3,7 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class NotificationService {
+class FirebaseNotification {
   int id = 0;
   final firebaseMessaging = FirebaseMessaging.instance;
 
@@ -31,11 +31,11 @@ class NotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print("User granted permission");
+      print('User granted permission');
 
       //prepare android init settings
       const AndroidInitializationSettings initSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher.png');
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
       //prepare ios init settings
       const initSettingsIOS = DarwinInitializationSettings(
@@ -63,7 +63,7 @@ class NotificationService {
     }
 
     // get FCM token
-    String? token = await firebaseMessaging.getToken();
+    final String? token = await firebaseMessaging.getToken();
     if (token != null) {
       print('FCM Token: $token');
     }
@@ -77,7 +77,7 @@ class NotificationService {
           channelDescription: 'Sample Notification Channel',
           importance: Importance.max,
           priority: Priority.high,
-          icon: "@drawable/android12splash"),
+          icon: '@drawable/android12splash'),
       iOS: DarwinNotificationDetails(),
     );
   }
@@ -93,7 +93,6 @@ class NotificationService {
   }
 
   // ON NOTIFICATION TAP
-
   final StreamController<String?> selectNotificationStream =
       StreamController<String?>.broadcast();
 

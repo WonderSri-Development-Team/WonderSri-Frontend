@@ -63,7 +63,7 @@ class _TestScreenState extends State<TestScreen> {
             const SizedBox(width: 20),
             ElevatedButton(
               onPressed: () {
-                NotificationService().showNotification(
+                FirebaseNotification().showNotification(
                   title: "Title",
                   body: "Body",
                 );

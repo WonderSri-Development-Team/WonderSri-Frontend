@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/screens/test_screen.dart';
 import 'package:frontend/service/firebase/firebase_notification.dart';
 import './screens/sign_in.dart';
@@ -7,16 +8,11 @@ import './screens/sign_in.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    name: "WonderSri",
-    options: const FirebaseOptions(
-        apiKey: "AIzaSyDKKDL84kCAjoFfvT2drzEaqoVATp3WJh4",
-        appId: "1:484578026292:android:a60901f6bedc16b3453b61",
-        projectId: "wondersri-98260",
-        messagingSenderId: "484578026292"),
-  );
+  // load environment variables
+  await dotenv.load();
 
-  NotificationService().initNotification();
+  _initializeFirebase();
+
   runApp(const MyApp());
 }
 
@@ -27,16 +23,28 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/test',
+      initialRoute: '/',
       routes: {
         '/': (context) => const LoginPage(),
-        '/test': (context) => TestScreen(),
+        // '/test': (context) => TestScreen(),
       },
     );
   }
 }
 
-Future<void> initializeDefault() async {
-  FirebaseApp app = Firebase.app("WonderSri");
-  print("Initialized default app $app");
+Future<void> _initializeFirebase() async {
+  try {
+    await Firebase.initializeApp(
+      name: "WonderSri",
+      options: FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY']!,
+        appId: dotenv.env['FIREBASE_APP_ID']!,
+        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
+      ),
+    );
+    FirebaseNotification().initNotification();
+  } catch (e) {
+    print("Firebase initialization failed: $e");
+  }
 }
