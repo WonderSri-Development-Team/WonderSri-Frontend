@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/screens/test_screen.dart';
 import 'package:frontend/service/firebase/firebase_notification.dart';
-import 'firebase_options.dart';
 import './screens/sign_in.dart';
 
 void main() async {

@@ -76,7 +76,8 @@ class NotificationService {
           'sample_channel_id', 'Sample Notification',
           channelDescription: 'Sample Notification Channel',
           importance: Importance.max,
-          priority: Priority.high),
+          priority: Priority.high,
+          icon: "@drawable/android12splash"),
       iOS: DarwinNotificationDetails(),
     );
   }
