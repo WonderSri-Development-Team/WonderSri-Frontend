@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'wondersri-98260.firebasestorage.app',
     measurementId: 'G-JE4RTY9QHF',
   );
+
 }
