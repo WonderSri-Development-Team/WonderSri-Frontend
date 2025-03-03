@@ -5,7 +5,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget{
+
+  const MapScreen({super.key});
   final destination = LatLng(6.028624, 80.216797);
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }

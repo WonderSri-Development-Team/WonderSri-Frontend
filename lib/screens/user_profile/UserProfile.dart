@@ -11,7 +11,7 @@ import 'package:frontend/screens/user_profile/UserModel.dart';
 class UserProfilePage extends StatefulWidget {
   final User user;
 
-  UserProfilePage({required this.user});
+  const UserProfilePage({super.key, required this.user});
 
   @override
   _UserProfilePageState createState() => _UserProfilePageState();
