@@ -13,36 +13,15 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   final TextEditingController titleController = TextEditingController();
   final FirebaseMessaging messaging = FirebaseMessaging.instance;
+  final FirebaseNotification _firebaseNotification = FirebaseNotification();
 
   @override
   void initState() {
     super.initState();
-    requestPermission();
-    getToken();
+    _firebaseNotification.requestPermission();
+    _firebaseNotification.getToken();
   }
 
-  Future<void> requestPermission() async {
-    // Request permission for iOS (optional)
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-  }
-
-  Future<void> getToken() async {
-    // Ensure Firebase is initialized
-    await Firebase.initializeApp();
-
-    // Get the token
-    String? token = await messaging.getToken();
-    print("FCM Token: $token");
-    // You can send this token to your server to register the device
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,14 +35,14 @@ class _TestScreenState extends State<TestScreen> {
           children: [
             ElevatedButton(
               onPressed: () async {
-                await getToken();
+                await _firebaseNotification.getToken();
               },
               child: const Text('Get FCM Token'),
             ),
             const SizedBox(width: 20),
             ElevatedButton(
               onPressed: () {
-                FirebaseNotification().showNotification(
+                _firebaseNotification.showNotification(
                   title: "Title",
                   body: "Body",
                 );

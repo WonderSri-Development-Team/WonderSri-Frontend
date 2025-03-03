@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -17,7 +18,6 @@ class FirebaseNotification {
   final flutterNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
-
   bool get isInitialized => _isInitialized;
 
   // INITIALIZE
@@ -69,12 +69,32 @@ class FirebaseNotification {
     }
   }
 
+  Future<void> requestPermission() async {
+    // Request permission for iOS (optional)
+    NotificationSettings settings = await firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+  }
+
+  Future<void> getToken() async {
+    String? token = await firebaseMessaging.getToken();
+    print("FCM Token: $token");
+    // send this token to server to register the device
+  }
+
+
   // NOTIFICATION DETAILS
   NotificationDetails notificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
-          'sample_channel_id', 'Sample Notification',
-          channelDescription: 'Sample Notification Channel',
+          'high_importance_channel', 'High Importance Notifications',
+          channelDescription: 'This channel is used for important notifications.',
           importance: Importance.max,
           priority: Priority.high,
           icon: '@drawable/android12splash'),
