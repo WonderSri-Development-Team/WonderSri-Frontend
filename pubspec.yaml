@@ -52,6 +52,7 @@ dependencies:
   shared_preferences: ^2.5.2
 
 
+
 flutter_launcher_icons:
   android: true
   ios: true
@@ -97,6 +98,7 @@ flutter:
     - assets/images/mirissa.jpg
     - assets/images/Splash.png
     - assets/images/Splash2.png
+    - .env
 
     - assets/images/madu_river.jpg
     - assets/images/knucles.jpg
