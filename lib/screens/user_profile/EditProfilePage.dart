@@ -27,7 +27,7 @@ class EditProfilePage extends StatefulWidget {
   
   final User user;
 
-  const EditProfilePage({required this.user});
+  const EditProfilePage({super.key, required this.user});
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
