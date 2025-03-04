@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
@@ -6,8 +7,7 @@ import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget{
 
-  const MapScreen({super.key});
-  final destination = LatLng(6.028624, 80.216797);
+  final destination = LatLng(6.063466, 80.199796);
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -16,8 +16,13 @@ class MapScreen extends StatefulWidget{
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController mapController;
   LatLng? _currentLocation;
-
   Set<Polyline> _polylines = {};
+
+  bool _showInstructions = false;
+  bool _alertShow = false;
+
+  List<String> _instructions = [];
+  Stream<Position>? _positionStream;
 
   @override
   void initState() {
@@ -29,7 +34,6 @@ class _MapScreenState extends State<MapScreen> {
     // Check if location services are enabled
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled, show a message or request to enable them
       return;
     }
 
@@ -44,7 +48,6 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are permanently denied, show a message
       return;
     }
 
@@ -57,22 +60,74 @@ class _MapScreenState extends State<MapScreen> {
     if (_currentLocation != null) {
       _fetchAndDrawRoute(_currentLocation!, widget.destination);
     }
+
+    // Listen for location changes
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 1, // Updates every 10 meters-----------------------------------------------
+      ),
+    );
+
+    _positionStream!.listen((Position newPosition) {
+      LatLng newLocation = LatLng(newPosition.latitude, newPosition.longitude);
+
+      double distance = Geolocator.distanceBetween(
+        _currentLocation!.latitude, _currentLocation!.longitude,
+        newLocation.latitude, newLocation.longitude,
+      );
+
+      if (distance > 1) { //----------------------------------------------distance meter
+        setState(() {
+          _currentLocation = newLocation;
+        });
+        _fetchAndDrawRoute(_currentLocation!, widget.destination);
+      }
+      _checkDistance();
+    });
   }
 
-  // Future<void> _fetchAndDrawRoute(LatLng origin, LatLng destination) async {
-  //   final route = await fetchRoute(origin, destination);
-  //   final points = decodePolyline(route['routes'][0]['overview_polyline']['points']);
-  //   setState(() {
-  //     _polylines.add(
-  //       Polyline(
-  //         polylineId: PolylineId('route'),
-  //         points: points,
-  //         color: Colors.blue,
-  //         width: 5,
-  //       ),
-  //     );
-  //   });
-  // }
+
+  void _checkDistance(){
+    if(_currentLocation == null) return;
+
+    double distance = Geolocator.distanceBetween(
+      _currentLocation!.latitude,
+      _currentLocation!.longitude,
+      widget.destination.latitude,
+      widget.destination.longitude,
+    );
+
+    if(distance <= 10 && !_alertShow){
+      _alertShow = true;
+      _showArrivalPopup();
+    }
+
+  }
+
+  void _showArrivalPopup() {
+    if(!_alertShow) {
+      _alertShow = true;
+      showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              title: Text("You have arrived!"),
+              content: Text("You are within 5 meters of your destination."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // _alertShow = false; // Reset alert flag
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            ),
+      );
+    }
+  }
+
 
   Future<void> _fetchAndDrawRoute(LatLng origin, LatLng destination) async {
     print('Fetching route from $origin to $destination');
@@ -91,8 +146,13 @@ class _MapScreenState extends State<MapScreen> {
             width: 5,
           ),
         );
+        _instructions.clear();
+        List<dynamic> steps = route['routes'][0]['legs'][0]['steps'];
+        for (var step in steps) {
+          String instruction = step['html_instructions'];
+          _instructions.add(instruction.replaceAll(RegExp(r'<[^>]*>'), '')); // Remove HTML tags
+        }
       });
-
       print('Polyline added with ${points.length} points');
     } else {
       print('No route found');
@@ -101,8 +161,8 @@ class _MapScreenState extends State<MapScreen> {
 
 
   Future<Map<String, dynamic>> fetchRoute(LatLng origin, LatLng destination) async {
-    // Add direction API key**********************************************************************************
-    final String apiKey = '';
+    await dotenv.load();
+    final String apiKey = dotenv.env['DIRECTION_API_KEY'] ?? 'No_Key_Found';
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey';
 
@@ -149,6 +209,41 @@ class _MapScreenState extends State<MapScreen> {
     return points;
   }
 
+  void _showNavigationInstructions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(10),
+          height: 300,
+          child: ListView.builder(
+            itemCount: _instructions.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: Icon(Icons.directions),
+                title: Text(
+                  _instructions[index].replaceAll(RegExp(r'<[^>]*>'), ''), // Remove HTML tags
+                  style: TextStyle(fontSize: 16),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _onShowDirectionsPressed() {
+    if (_currentLocation == null) return;
+
+    setState(() {
+      _showInstructions = true; // Show instructions in the lower half
+    });
+
+    _fetchAndDrawRoute(_currentLocation!, widget.destination);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,28 +252,102 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: _currentLocation == null
           ? Center(child: CircularProgressIndicator())
-          : GoogleMap(
-        onMapCreated: (GoogleMapController controller) {
-          mapController = controller;
-        },
-        initialCameraPosition: CameraPosition(
-          target: _currentLocation!,
-          zoom: 15.0,
-        ),
-        markers: {
-          Marker(
-            markerId: MarkerId('currentLocation'),
-            position: _currentLocation!,
-          ),
-          Marker(
-            markerId: MarkerId('destination'),
-            position: widget.destination,
-          ),
-        },
-        polylines: _polylines,
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
-      ),
+          : Column(
+            children: [
+              Expanded(
+                flex: _showInstructions? 1:2,
+                child: Stack(
+                  children: [
+                    GoogleMap(
+                      onMapCreated: (GoogleMapController controller) {
+                        mapController = controller;
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target: _currentLocation!,
+                        zoom: 15.0,
+                      ),
+                      markers: {
+                        Marker(
+                          markerId: MarkerId('currentLocation'),
+                          position: _currentLocation!,
+                        ),
+                        Marker(
+                          markerId: MarkerId('destination'),
+                          position: widget.destination,
+                        ),
+                      },
+                      polylines: _polylines,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                    ),
+                    if(!_showInstructions)
+                      Positioned(
+                        bottom: 30, // Keep it visible on map
+                        left: 70,
+                        right: 70,
+                        child: ElevatedButton(
+                          onPressed: _onShowDirectionsPressed,
+                          child: Text("Show Directions"),
+                        ),
+                      ),
+                  ]
+                )
+              ),
+
+              if(_showInstructions)
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    color: Colors.white,
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: (){
+                              setState(() {
+                                _showInstructions=false;
+                              });
+                            },
+                          ),
+                        ),
+                        Expanded(
+                            child: ListView.builder(
+                              itemCount: _instructions.length,
+                              itemBuilder: (context, index) {
+
+                                String instruction = _instructions[index];
+                                IconData instructionIcon = Icons.directions;
+                                if(instruction.toLowerCase().contains('left')) {
+                                  instructionIcon = Icons.turn_left;
+                                }else if(instruction.toLowerCase().contains('right')) {
+                                  instructionIcon = Icons.turn_right;
+                                }else if(instruction.toLowerCase().contains('straight')) {
+                                  instructionIcon = Icons.straight;
+                                }else if(instruction.toLowerCase().contains('destination')) {
+                                  instructionIcon = Icons.location_on;
+                                }else if(instruction.toLowerCase().contains("head")){
+                                  instructionIcon = Icons.navigation;;
+                                }
+
+                                return ListTile(
+                                  leading: Icon(instructionIcon),
+                                  title: Text(
+                                    _instructions[index],
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                );
+                              },
+                            )
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+            ]
+          )
     );
   }
 }
