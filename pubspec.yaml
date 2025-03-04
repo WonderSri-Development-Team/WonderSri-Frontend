@@ -2,8 +2,7 @@ name: frontend
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
+publish_to: 'none' # Remove this line if you wish to publish to pub.de014.258-
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
@@ -31,14 +30,41 @@ dependencies:
   flutter:
     sdk: flutter
 
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_native_splash: ^2.4.4
+  flutter_launcher_icons: ^0.14.3
+  http: ^1.3.0
+
+  geolocator: ^13.0.2
+  permission_handler: ^11.3.1
+  geocoding: ^2.1.1
+  google_maps_flutter: ^2.10.0
+  flutter_dotenv: ^5.2.1
+  
+ 
+  font_awesome_flutter: ^10.0.0
+  url_launcher: ^6.1.6
+
+  google_sign_in: ^6.2.2
+  shared_preferences: ^2.5.2
+
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icon.png"
+  adaptive_icon_foreground: "assets/images/logo-blue.png"
+#  adaptive_icon_background: "assets/adaptive_background.png"
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -46,6 +72,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  url_launcher: ^6.1.10
+ 
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -63,6 +91,49 @@ flutter:
     - assets/images/logo-blue.png
     - assets/images/logo-white.png
     - assets/images/google.png
+    - assets/images/icon.png
+    - assets/images/benthota.jpg
+    - assets/images/GalleFort_1.jpg
+    - assets/images/hikkaduwa-beach.jpg
+    - assets/images/mirissa.jpg
+    - assets/images/Splash.png
+    - assets/images/Splash2.png
+    - .env
+
+    - assets/images/madu_river.jpg
+    - assets/images/knucles.jpg
+    - assets/images/kithulgala.jpg
+    - assets/images/jamiUl.jpg
+    - assets/images/nuwara-eliya.jpg
+
+    - assets/images/nuwara-eliya.jpg
+    - assets/images/kalaniya.jpg
+    - assets/images/sinharaja.jpg
+    - assets/images/trinco.jpg
+    - assets/images/piduruthalagala.jpg
+    - assets/images/yala.jpg
+    - assets/images/madu_river.jpg
+    - assets/images/kalaniya.jpg
+    - assets/images/sinharaja.jpg
+    - assets/images/aru.jpg
+    - assets/images/pinnawala.jpg
+    - assets/images/bundala.jpg
+    - assets/images/udawalwa.jpg
+    - assets/images/adams.jpg
+    - assets/images/polonnaruwa.jpg
+    - assets/images/ella.jpg
+    - assets/images/nilaveli.jpg
+    - assets/images/minneriya.jpg
+    - assets/images/horton.jpg
+    - assets/images/dabulla.jpg
+    - assets/images/jaffna.jpg
+    - assets/images/anuradapura.jpg
+    - assets/images/maligawa.jpg
+    - assets/images/ravana.jpg
+    - assets/images/sigiri.jpg
+   
+   
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -108,7 +179,7 @@ flutter_native_splash:
   # splash screen to a png image.  This is useful for gradients. The image will be stretch to the
   # size of the app. Only one parameter can be used, color and background_image cannot both be set.
 
-  color: "#ffffff"
+  color: "#2D46B9"
 
   # background_image: "assets/images/Background1.png"
 
@@ -117,7 +188,7 @@ flutter_native_splash:
 
   # The image parameter allows you to specify an image used in the splash screen.  It must be a
   # png file and should be sized for 4x pixel density.
-  image: assets/images/logo-blue.png
+  image: assets/images/Splash2.png
 
   # The branding property allows you to specify an image used as branding in the splash screen.
   # It must be a png file. It is supported for Android, iOS and the Web.  For Android 12,
@@ -154,10 +225,10 @@ flutter_native_splash:
     # 768 pixels in diameter.  To fit a 1152x1152 image within a circle with a 768 diameter, simply 
     # ensure that the most important design elements of your image are placed within a circular area
     # with a 768 diameter at the center of the 1152x1152 canvas.
-    image: assets/images/logo-blue.png
+    image: assets/images/Splash2.png
 
     # Splash screen background color.
-    color: "#ffffff"
+    color: "#2D46B9"
 
     # App icon background color.
     #icon_background_color: "#111111"
