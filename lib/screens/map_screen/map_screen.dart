@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget{
-  final destination = LatLng(6.028624, 80.216797);
+  final destination = LatLng(6.063466, 80.199796);
   @override
   _MapScreenState createState() => _MapScreenState();
 }
@@ -17,6 +17,7 @@ class _MapScreenState extends State<MapScreen> {
   Set<Polyline> _polylines = {};
 
   bool _showInstructions = false;
+  bool _alertShow = false;
 
   List<String> _instructions = [];
   Stream<Position>? _positionStream;
@@ -80,7 +81,49 @@ class _MapScreenState extends State<MapScreen> {
         });
         _fetchAndDrawRoute(_currentLocation!, widget.destination);
       }
+      _checkDistance();
     });
+  }
+
+
+  void _checkDistance(){
+    if(_currentLocation == null) return;
+
+    double distance = Geolocator.distanceBetween(
+      _currentLocation!.latitude,
+      _currentLocation!.longitude,
+      widget.destination.latitude,
+      widget.destination.longitude,
+    );
+
+    if(distance <= 10 && !_alertShow){
+      _alertShow = true;
+      _showArrivalPopup();
+    }
+
+  }
+
+  void _showArrivalPopup() {
+    if(!_alertShow) {
+      _alertShow = true;
+      showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              title: Text("You have arrived!"),
+              content: Text("You are within 5 meters of your destination."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // _alertShow = false; // Reset alert flag
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            ),
+      );
+    }
   }
 
 
@@ -272,8 +315,23 @@ class _MapScreenState extends State<MapScreen> {
                             child: ListView.builder(
                               itemCount: _instructions.length,
                               itemBuilder: (context, index) {
+
+                                String instruction = _instructions[index];
+                                IconData instructionIcon = Icons.directions;
+                                if(instruction.toLowerCase().contains('left')) {
+                                  instructionIcon = Icons.turn_left;
+                                }else if(instruction.toLowerCase().contains('right')) {
+                                  instructionIcon = Icons.turn_right;
+                                }else if(instruction.toLowerCase().contains('straight')) {
+                                  instructionIcon = Icons.straight;
+                                }else if(instruction.toLowerCase().contains('destination')) {
+                                  instructionIcon = Icons.location_on;
+                                }else if(instruction.toLowerCase().contains("head")){
+                                  instructionIcon = Icons.navigation;;
+                                }
+
                                 return ListTile(
-                                  leading: Icon(Icons.directions),
+                                  leading: Icon(instructionIcon),
                                   title: Text(
                                     _instructions[index],
                                     style: TextStyle(fontSize: 16),
