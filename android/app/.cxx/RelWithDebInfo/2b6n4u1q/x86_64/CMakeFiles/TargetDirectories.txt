@@ -1,2 +1,0 @@
-D:/Education/IIT/Y2 Sem 1/5COSC021C SDGP/WonderSri/WonderSri-Frontend/android/app/.cxx/RelWithDebInfo/2b6n4u1q/x86_64/CMakeFiles/edit_cache.dir
-D:/Education/IIT/Y2 Sem 1/5COSC021C SDGP/WonderSri/WonderSri-Frontend/android/app/.cxx/RelWithDebInfo/2b6n4u1q/x86_64/CMakeFiles/rebuild_cache.dir
