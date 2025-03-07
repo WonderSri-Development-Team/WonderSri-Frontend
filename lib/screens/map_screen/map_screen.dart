@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget{
 
-  final destination = LatLng(6.063466, 80.199796);
+  final destination = LatLng(6.07186382837425, 80.19296548217272);
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -64,8 +64,8 @@ class _MapScreenState extends State<MapScreen> {
     // Listen for location changes
     _positionStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 1, // Updates every 10 meters-----------------------------------------------
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 2, // Updates every 10 meters-----------------------------------------------
       ),
     );
 
@@ -87,7 +87,7 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-
+  // check the distance between user's live location and destinations location
   void _checkDistance(){
     if(_currentLocation == null) return;
 
@@ -98,29 +98,106 @@ class _MapScreenState extends State<MapScreen> {
       widget.destination.longitude,
     );
 
-    if(distance <= 10 && !_alertShow){
-      _alertShow = true;
+    if(distance <= 50){
       _showArrivalPopup();
     }
 
   }
 
+  // the location description screen
+  void _showLocationDescription(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows it to cover 3/4 of the screen
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.75, // Starts at 3/4 of the screen
+        minChildSize: 0.1, // Can be dragged down to hide
+        maxChildSize: 1.0, // Can expand fully if needed
+        builder: (context, scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            padding: EdgeInsets.all(20),
+            child: ListView(
+              controller: scrollController, // Allows scrolling within the sheet
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Galle Fort",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Galle Fort is a historical site in Sri Lanka, originally built by the Portuguese and later fortified by the Dutch...",
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Location Details",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "• Built in the 16th century\n• UNESCO World Heritage Site\n• Famous for colonial architecture",
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Close"),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // when user reached to  location the alert will be shown, asking for to display the description of the location
   void _showArrivalPopup() {
     if(!_alertShow) {
-      _alertShow = true;
+      setState(() {
+        _alertShow = true;
+      });
       showDialog(
         context: context,
         builder: (context) =>
             AlertDialog(
-              title: Text("You have arrived!"),
-              content: Text("You are within 5 meters of your destination."),
+              title: Text("You have arrived to a Location!"),
+              content: Text("Would you like to know about this location?"),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    // _alertShow = false; // Reset alert flag
+                    // setState(() {
+                    //   _alertShow = false;
+                    // });
                   },
-                  child: Text("OK"),
+                  child: Text("No"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close the alert
+                    _showLocationDescription(context); // Show draggable sheet
+                    // setState(() {
+                    //   _alertShow = false;
+                    // });
+                  },
+                  child: Text("Yes"),
                 ),
               ],
             ),
@@ -128,7 +205,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-
+  // draw polylines
   Future<void> _fetchAndDrawRoute(LatLng origin, LatLng destination) async {
     print('Fetching route from $origin to $destination');
     final route = await fetchRoute(origin, destination);
@@ -209,6 +286,7 @@ class _MapScreenState extends State<MapScreen> {
     return points;
   }
 
+  // display navigation instructions. E.x:- turn left/ turn right
   void _showNavigationInstructions() {
     showModalBottomSheet(
       context: context,
@@ -267,10 +345,10 @@ class _MapScreenState extends State<MapScreen> {
                         zoom: 15.0,
                       ),
                       markers: {
-                        Marker(
-                          markerId: MarkerId('currentLocation'),
-                          position: _currentLocation!,
-                        ),
+                        // Marker(
+                        //   markerId: MarkerId('currentLocation'),
+                        //   position: _currentLocation!,
+                        // ),
                         Marker(
                           markerId: MarkerId('destination'),
                           position: widget.destination,
