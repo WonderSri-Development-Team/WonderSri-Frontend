@@ -1,8 +1,10 @@
 // lib/services/location_service.dart
 
+//withoput mock location file
+/*
 import 'dart:convert';
 import 'package:frontend/models/nearby_location_model.dart';
-//import 'package:home_page/widgets/mock_location.dart';
+import 'package:home_page/widgets/mock_location.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -25,17 +27,12 @@ class LocationService {
       throw Exception('Error fetching nearby locations: $e');
     }
   }
-}
-
+}*/
 
 // In your location provider or service file
 
-
-/*import 'package:home_page/widgets/mock_location.dart';
-// lib/widgets/location_service.dart
-
-import 'package:home_page/widgets/nearby_location_model.dart';
-
+import 'package:frontend/models/nearby_location_model.dart';
+import 'package:frontend/widgets/mock_location.dart';
 
 class LocationService {
   // Use your mock service to get mock data
@@ -43,20 +40,20 @@ class LocationService {
     try {
       // Simulate network delay
       await Future.delayed(Duration(milliseconds: 1500));
-      
+
       // Get mock locations from your mock_location.dart file
       final locations = getMockLocations();
-      
+
       return locations;
     } catch (e) {
       print('Error fetching nearby locations: $e');
       throw Exception('Failed to load nearby locations: $e');
     }
   }
-  
+
   // You can keep this method if you need it elsewhere,
   // but rename it to match what your widget is expecting
   Future<List<NearbyLocation>> getNearbyLocations() async {
     return fetchNearbyLocations();
   }
-}*/
+}
