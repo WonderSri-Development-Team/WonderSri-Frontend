@@ -1,5 +1,6 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/nearby_location.dart';
 import 'package:frontend/widgets/popular_destinations.dart';
 
 import 'package:frontend/widgets/quick_bokking.dart';
@@ -39,10 +40,8 @@ class _HomeScreenState extends State<HomePage> {
               ),
             ),
             const QuickBookingSection(),
-
-            //const NearbyLocationsSection(),
-
             const PopularDestinationsSection(),
+            const NearbyLocationsWidget(),
           ],
         ),
       ),
