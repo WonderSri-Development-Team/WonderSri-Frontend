@@ -7,7 +7,11 @@ import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget{
 
-  final destination = LatLng(6.07186382837425, 80.19296548217272);
+  final List<LatLng> destinations = [
+    LatLng(6.072573479583131, 80.19483309338364),
+    LatLng(6.073160996893892, 80.19715934877867),
+    LatLng(6.073844612355768, 80.19794478003057),
+  ];
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -23,6 +27,8 @@ class _MapScreenState extends State<MapScreen> {
 
   List<String> _instructions = [];
   Stream<Position>? _positionStream;
+
+  int _currentDestinationIndex = 0;
 
   @override
   void initState() {
@@ -58,14 +64,14 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     if (_currentLocation != null) {
-      _fetchAndDrawRoute(_currentLocation!, widget.destination);
+      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
     }
 
     // Listen for location changes
     _positionStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
         accuracy: LocationAccuracy.best,
-        distanceFilter: 2, // Updates every 10 meters-----------------------------------------------
+        distanceFilter: 1, // Updates every 10 meters-----------------------------------------------
       ),
     );
 
@@ -81,7 +87,7 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           _currentLocation = newLocation;
         });
-        _fetchAndDrawRoute(_currentLocation!, widget.destination);
+        _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
       }
       _checkDistance();
     });
@@ -94,11 +100,11 @@ class _MapScreenState extends State<MapScreen> {
     double distance = Geolocator.distanceBetween(
       _currentLocation!.latitude,
       _currentLocation!.longitude,
-      widget.destination.latitude,
-      widget.destination.longitude,
+      widget.destinations[_currentDestinationIndex].latitude,
+      widget.destinations[_currentDestinationIndex].longitude,
     );
 
-    if(distance <= 50){
+    if(distance <= 20){
       _showArrivalPopup();
     }
 
@@ -186,6 +192,7 @@ class _MapScreenState extends State<MapScreen> {
                     // setState(() {
                     //   _alertShow = false;
                     // });
+                    _moveToNextDestination();
                   },
                   child: Text("No"),
                 ),
@@ -196,11 +203,37 @@ class _MapScreenState extends State<MapScreen> {
                     // setState(() {
                     //   _alertShow = false;
                     // });
+                    _moveToNextDestination();
                   },
                   child: Text("Yes"),
                 ),
               ],
             ),
+      );
+    }
+  }
+
+  void _moveToNextDestination() {
+    if (_currentDestinationIndex < widget.destinations.length - 1) {
+      setState(() {
+        _currentDestinationIndex++; // Move to the next destination
+        _alertShow = false; // Reset the alert flag
+      });
+      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
+    } else {
+      // All destinations reached
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Congratulations!"),
+          content: Text("You have reached all destinations."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("OK"),
+            ),
+          ],
+        ),
       );
     }
   }
@@ -318,7 +351,7 @@ class _MapScreenState extends State<MapScreen> {
       _showInstructions = true; // Show instructions in the lower half
     });
 
-    _fetchAndDrawRoute(_currentLocation!, widget.destination);
+    _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
   }
 
 
@@ -351,7 +384,7 @@ class _MapScreenState extends State<MapScreen> {
                         // ),
                         Marker(
                           markerId: MarkerId('destination'),
-                          position: widget.destination,
+                          position: widget.destinations[_currentDestinationIndex],
                         ),
                       },
                       polylines: _polylines,
