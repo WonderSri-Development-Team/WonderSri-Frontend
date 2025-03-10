@@ -9,6 +9,7 @@ import 'package:frontend/service/api_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../service/ForgotPasswordPage.dart';
 
 import 'home_page.dart';
 
@@ -28,35 +29,59 @@ class _LoginPageState extends State<LoginPage>{
 
   bool isLoading = false;
 
-  void _login() async {
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> _login() async {
+    // backend URL for login
+    final String apiUrl = "https://wondersri-backend.onrender.com/auth/login/";
 
-    try {
-      final response = await apiService.login(
-        emailController.text,
-        passwordController.text,
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": emailController.text,
+        "password": passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      print("User authenticated: ${responseData['token']}");
+
+      // Store the authentication token
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', responseData['token']);
+
+      // Navigate to the home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
-
-      print("Login response: $response");
-
-      if (response.isNotEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => NavController()),
-        );
-      }
-    } catch (error) {
-      print("Login error: $error");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login failed: ${error.toString()}")),
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+    } else {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      _showDialog("Error", responseData["error"] ?? "Login failed.");
     }
+  }
+
+  void _showDialog(String title, String message, [VoidCallback? onOkPressed]) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onOkPressed != null) {
+                  onOkPressed();
+                }
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
 
@@ -177,7 +202,10 @@ class _LoginPageState extends State<LoginPage>{
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
-                              // forgot password logic
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                              );
                             },
                             child: Text(
                               "Forgot password?",
