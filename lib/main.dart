@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import './screens/sign_in.dart';
+import 'package:provider/provider.dart';
+import './service/location_provider.dart';
+
 
 void main() async{
   await dotenv.load(fileName: ".env");
   final String mapsApiKey = dotenv.get('MAPS_API_KEY');
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LocationProvider()), // Add LocationProvider
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
