@@ -58,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     TextButton(
                       onPressed: () {
                         // Navigate to edit profile page
-                        Navigator.push(
+                        /*Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => EditProfilePage(
@@ -72,7 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     location: '',
                                     language: '')), //  Open EditProfilePage
                           ),
-                        );
+                        );*/
                       },
                       child: Text(
                         'Edit Profile',
