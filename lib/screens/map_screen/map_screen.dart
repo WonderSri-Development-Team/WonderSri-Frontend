@@ -13,6 +13,7 @@ class MapScreen extends StatefulWidget{
     LatLng(6.073844612355768, 80.19794478003057),
   ];
 
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
