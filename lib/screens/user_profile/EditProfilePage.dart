@@ -299,9 +299,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
 }*/
 
 
+
+
+
 import 'package:flutter/material.dart';
 
 // User model - Move this to a separate models folder in a real app
+class User {
+  final String fullName;
+  final String username;
+  final String email;
+  final String phone;
+  final String dateOfBirth;
+  final String gender;
+  final String location;
+  final String language;
+
+  User({
+    required this.fullName,
+    required this.username,
+    required this.email,
+    required this.phone,
+    required this.dateOfBirth,
+    required this.gender,
+    required this.location,
+    required this.language,
+  });
+}
+
 class EditProfilePage extends StatefulWidget {
   // Make the user parameter optional to allow navigation from sign-in
   final User? user;
@@ -311,6 +336,7 @@ class EditProfilePage extends StatefulWidget {
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
 }
+
 
 class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _fullNameController;
