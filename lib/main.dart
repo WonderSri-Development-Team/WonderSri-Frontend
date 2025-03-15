@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import './screens/sign_in.dart';
 
-void main() async{
+void main() async {
   await dotenv.load(fileName: ".env");
   final String mapsApiKey = dotenv.get('MAPS_API_KEY');
   runApp(const MyApp());
@@ -11,7 +11,6 @@ void main() async{
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,4 +18,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
