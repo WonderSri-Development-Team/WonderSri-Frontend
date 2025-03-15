@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/popular_destinations.dart  ';
 
-
 class AllDestinationsScreen extends StatelessWidget {
   const AllDestinationsScreen({super.key});
 
