@@ -1,5 +1,3 @@
-
-
 class User {
   final String fullName;
   final String username;
@@ -21,14 +19,13 @@ class User {
     required this.language,
   });
   final User user = User(
-    fullName: '',
-    username: '',
-    email: '',
-    phone: '',
-    dateOfBirth: '',
-    location: '',
-    language: '',
-    gender: '',
+    fullName: 'John',
+    username: 'JohnDoe',
+    email: 'jone@gmail.com',
+    phone: '256456',
+    dateOfBirth: '03.06.2002',
+    location: 'nuwara',
+    language: 'sinhala',
+    gender: 'male',
   );
-
 }

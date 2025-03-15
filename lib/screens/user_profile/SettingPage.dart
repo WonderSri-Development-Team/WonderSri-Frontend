@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/helpCenter.dart';
-import 'package:frontend/screens/user_profile/EditProfilePage.dart';
-import 'package:frontend/screens/user_profile/changePassword_screen.dart';
 
-import 'UserModel.dart';
+import 'package:frontend/screens/user_profile/EditProfilePage.dart'
+    as editProfile;
+import 'package:frontend/screens/user_profile/UserModel.dart' as userModel;
+
+import 'package:frontend/screens/user_profile/changePassword_screen.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -58,11 +60,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     TextButton(
                       onPressed: () {
                         // Navigate to edit profile page
-                        /*Navigator.push(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EditProfilePage(
-                                user: User(
+                            builder: (context) => editProfile.EditProfilePage(
+                                user: userModel.User(
                                     fullName: '',
                                     username: '',
                                     email: '',
@@ -70,9 +72,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                     dateOfBirth: '',
                                     gender: '',
                                     location: '',
-                                    language: '')), //  Open EditProfilePage
+                                    language: '')), // Open EditProfilePage
                           ),
-                        );*/
+                        );
                       },
                       child: Text(
                         'Edit Profile',

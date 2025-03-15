@@ -1,15 +1,9 @@
-
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/user_profile/EditProfilePage.dart';
-import 'package:frontend/screens/user_profile/UserModel.dart';
-
-
-
-
-
+import 'package:frontend/screens/user_profile/EditProfilePage.dart' as edit;
+import 'package:frontend/screens/user_profile/UserModel.dart' as model;
 
 class UserProfilePage extends StatefulWidget {
-  final User user;
+  final model.User user;
 
   UserProfilePage({required this.user});
 
@@ -18,7 +12,7 @@ class UserProfilePage extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  late User _user;
+  late model.User _user;
 
   @override
   void initState() {
@@ -135,7 +129,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final updatedUser = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfilePage(user: _user),
+        builder: (context) => edit.EditProfilePage(user: _user),
       ),
     );
 
