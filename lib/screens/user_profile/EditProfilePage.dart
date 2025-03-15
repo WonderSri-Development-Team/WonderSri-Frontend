@@ -24,7 +24,6 @@ class User {
 }*/
 
 class EditProfilePage extends StatefulWidget {
-  
   final User user;
 
   const EditProfilePage({required this.user});

@@ -5,7 +5,14 @@ import 'package:frontend/screens/user_profile/changePassword_screen.dart';
 
 import 'UserModel.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool isDarkMode = false;
+  bool isNotificationsEnabled = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,7 +21,7 @@ class SettingsPage extends StatelessWidget {
         backgroundColor: Color(0xFF2D46B9),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(28),
+        padding: EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -100,11 +107,32 @@ class SettingsPage extends StatelessWidget {
             ),
 
             buildSettingItem('Payments method ', Icons.payment),
-            buildSettingItem('Notification', Icons.notifications),
+            buildSettingItem(
+              'Notification',
+              Icons.notifications,
+              switchValue: isNotificationsEnabled,
+              onSwitchChanged: (value) {
+                setState(() {
+                  isNotificationsEnabled = value;
+                });
+              },
+            ),
             SizedBox(height: 25.0),
             buildSettingTitle('App Preferences'),
             buildSettingItem('Language', Icons.language),
-            buildSettingItem('Dark Theme', Icons.color_lens),
+            //buildSettingItem('Dark Theme', Icons.color_lens),
+
+            buildSettingItem(
+              'Dark Theme',
+              Icons.color_lens,
+              switchValue: isDarkMode,
+              onSwitchChanged: (value) {
+                setState(() {
+                  isDarkMode = value;
+                  // Here you could also implement the actual theme change logic
+                });
+              },
+            ),
             buildSettingItem('Location Services', Icons.location_on),
             buildSettingItem('Currency', Icons.attach_money),
             SizedBox(height: 25.0),
@@ -184,7 +212,8 @@ Widget buildSettingTitle(String title) {
 }
 
 //create setting item
-Widget buildSettingItem(String title, IconData icon, {VoidCallback? onTap}) {
+Widget buildSettingItem(String title, IconData icon,
+    {VoidCallback? onTap, bool? switchValue, Function(bool)? onSwitchChanged}) {
   return ListTile(
     leading: Icon(
       icon,
@@ -197,11 +226,17 @@ Widget buildSettingItem(String title, IconData icon, {VoidCallback? onTap}) {
         color: Colors.black,
       ),
     ),
-    trailing: Icon(
-      Icons.arrow_forward_ios,
-      size: 16.0,
-      color: Colors.grey,
-    ),
-    onTap: onTap,
+    trailing: switchValue != null
+        ? Switch(
+            value: switchValue,
+            onChanged: onSwitchChanged,
+            activeColor: Color(0xFF2D46B9),
+          )
+        : Icon(
+            Icons.arrow_forward_ios,
+            size: 16.0,
+            color: Colors.grey,
+          ),
+    onTap: switchValue == null ? onTap : null,
   );
 }
