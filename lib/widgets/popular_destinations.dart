@@ -248,6 +248,15 @@ class PopularDestinationsSection extends StatelessWidget {
             ],
           ),
         ),
+
+
+
+
+
+
+
+
+
         SizedBox(
           height: 200,
           child: ListView.builder(
