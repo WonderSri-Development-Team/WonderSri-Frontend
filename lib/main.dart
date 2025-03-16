@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import './service/location_provider.dart';
 
 
-void main() async{
+void main() async {
   await dotenv.load(fileName: ".env");
   final String mapsApiKey = dotenv.get('MAPS_API_KEY');
   runApp(
@@ -21,7 +21,6 @@ void main() async{
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,4 +28,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
