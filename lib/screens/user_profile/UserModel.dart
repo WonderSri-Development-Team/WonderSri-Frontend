@@ -19,4 +19,8 @@ class User {
     required this.location,
     required this.language,
   });
+
+  get profilePhoto => null;
+}
+class UserModel {
 }

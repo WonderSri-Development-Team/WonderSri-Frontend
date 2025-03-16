@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/user_profile/UserModel.dart';
+import 'package:frontend/screens/user_profile/EditProfilePage.dart';
+import 'package:frontend/screens/user_profile/UserModel.dart' as model;
 /*
 class User {
   final String fullName;
@@ -298,11 +299,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 }*/
 
-
-
-
-
 import 'package:flutter/material.dart';
+
+import 'UserModel.dart';
 
 // User model - Move this to a separate models folder in a real app
 class User {
@@ -328,15 +327,14 @@ class User {
 }
 
 class EditProfilePage extends StatefulWidget {
-  // Make the user parameter optional to allow navigation from sign-in
-  final User? user;
+  final model.User? user;
+  final model.UserModel? userModel; // Use model. namespace here too
 
-  const EditProfilePage({Key? key, this.user}) : super(key: key);
+  EditProfilePage({this.user, this.userModel});
 
   @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
+  _EditProfilePageState createState() => _EditProfilePageState();
 }
-
 
 class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _fullNameController;
@@ -354,13 +352,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     // Initialize with user data if available
-    _fullNameController = TextEditingController(text: widget.user?.fullName ?? '');
-    _usernameController = TextEditingController(text: widget.user?.username ?? '');
+    _fullNameController =
+        TextEditingController(text: widget.user?.fullName ?? '');
+    _usernameController =
+        TextEditingController(text: widget.user?.username ?? '');
     _emailController = TextEditingController(text: widget.user?.email ?? '');
     _phoneController = TextEditingController(text: widget.user?.phone ?? '');
-    _dateOfBirthController = TextEditingController(text: widget.user?.dateOfBirth ?? '');
-    _locationController = TextEditingController(text: widget.user?.location ?? '');
-    _languageController = TextEditingController(text: widget.user?.language ?? '');
+    _dateOfBirthController =
+        TextEditingController(text: widget.user?.dateOfBirth ?? '');
+    _locationController =
+        TextEditingController(text: widget.user?.location ?? '');
+    _languageController =
+        TextEditingController(text: widget.user?.language ?? '');
   }
 
   @override
@@ -389,7 +392,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             borderRadius: BorderRadius.circular(8.0),
             borderSide: BorderSide(width: 1.5),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         ),
       ),
     );
@@ -424,7 +428,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text('Delete Account'),
-                  content: Text('Are you sure you want to delete your account?'),
+                  content:
+                      Text('Are you sure you want to delete your account?'),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -515,25 +520,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 hintText: 'Enter your name'),
             _buildTextField('Username', _usernameController,
                 hintText: 'Enter your username'),
-            
             _buildSectionTitle('Contact Information'),
-            
             _buildTextField('Email', _emailController,
                 hintText: 'Enter your email'),
             _buildTextField('Phone Number', _phoneController,
                 hintText: 'Enter your phone number'),
             _buildTextField('Date Of Birth', _dateOfBirthController,
                 hintText: 'Enter your date of birth'),
-            
             _buildSectionTitle('Additional Information'),
-            
             _buildTextField('Location', _locationController,
                 hintText: 'Enter your location'),
             _buildTextField('Language', _languageController,
                 hintText: 'Enter your language'),
-            
             _buildSectionTitle('Privacy Settings'),
-            
             SwitchListTile(
               title: const Text('Private Account'),
               subtitle: const Text('Only followers can see your posts'),
@@ -554,7 +553,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 });
               },
             ),
-            
             const SizedBox(height: 24),
             _buildDeleteAccountButton(),
           ],

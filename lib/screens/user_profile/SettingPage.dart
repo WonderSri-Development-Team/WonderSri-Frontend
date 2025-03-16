@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/helpCenter.dart';
-import 'package:frontend/screens/user_profile/EditProfilePage.dart' as editProfile;
+import 'package:frontend/screens/user_profile/EditProfilePage.dart'
+    as editProfile;
 import 'package:frontend/screens/user_profile/UserModel.dart';
+import 'package:frontend/screens/user_profile/UserProfile.dart';
 
 import 'package:frontend/screens/user_profile/changePassword_screen.dart';
-
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool isDarkMode = false;
   bool isNotificationsEnabled = false;
-  
+
   get userModel => null;
   @override
   Widget build(BuildContext context) {
@@ -58,22 +59,29 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Colors.grey,
                       ),
                     ),
+                    // In SettingsPage.dart
                     TextButton(
                       onPressed: () {
-                        // Navigate to edit profile page
-                       Navigator.push(
+                        // Create a User object with current user data
+                        final currentUser = User(
+                          fullName: 'John Doe', // Replace with actual data
+                          username: 'johndoe', // Replace with actual data
+                          email:
+                              'johndoe@example.com', // Replace with actual data
+                          phone: '+1234567890', // Replace with actual data
+                          dateOfBirth: '01/01/1990', // Replace with actual data
+                          gender: 'Male', // Replace with actual data
+                          location: 'New York', // Replace with actual data
+                          language: 'English', // Replace with actual data
+                        );
+
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => editProfile.EditProfilePage(
-                                user: userModel.User(
-                                    fullName: '',
-                                    username: '',
-                                    email: '',
-                                    phone: '',
-                                    dateOfBirth: '',
-                                    gender: '',
-                                    location: '',
-                                    language: '')), // Open EditProfilePage
+                              user: currentUser,
+                              userModel: userModel,
+                            ),
                           ),
                         );
                       },
@@ -94,6 +102,27 @@ class _SettingsPageState extends State<SettingsPage> {
             buildSettingItem(
               'Personal Information',
               Icons.person,
+              onTap: () {
+                // Create a User object with current user data
+                final currentUser = User(
+                  fullName: 'John Doe', // Replace with actual user data
+                  username: 'johndoe',
+                  email: 'johndoe@example.com',
+                  phone: '+1234567890',
+                  dateOfBirth: '01/01/1990',
+                  gender: 'Male',
+                  location: 'New York',
+                  language: 'English',
+                );
+
+                // Navigate to the UserProfilePage
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserProfilePage(user: currentUser),
+                  ),
+                );
+              },
             ),
 
             //buildSettingItem('Password and Security', Icons.lock),
