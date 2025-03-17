@@ -1,12 +1,11 @@
-
-
+// UserModel.dart
 class User {
   final String fullName;
   final String username;
   final String email;
   final String phone;
   final String dateOfBirth;
-  final String gender; // Added gender field
+  final String gender;
   final String location;
   final String language;
 
@@ -16,19 +15,12 @@ class User {
     required this.email,
     required this.phone,
     required this.dateOfBirth,
-    required this.gender, // Added gender field
+    required this.gender,
     required this.location,
     required this.language,
   });
-  final User user = User(
-    fullName: '',
-    username: '',
-    email: '',
-    phone: '',
-    dateOfBirth: '',
-    location: '',
-    language: '',
-    gender: '',
-  );
 
+  get profilePhoto => null;
+}
+class UserModel {
 }
