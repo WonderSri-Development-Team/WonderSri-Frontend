@@ -16,7 +16,9 @@ class _SettingsPageState extends State<SettingsPage> {
   bool isDarkMode = false;
   bool isNotificationsEnabled = false;
 
+
   get userModel => null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

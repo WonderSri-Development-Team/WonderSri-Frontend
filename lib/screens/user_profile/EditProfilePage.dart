@@ -35,6 +35,7 @@ class EditProfilePage extends StatefulWidget {
 
   EditProfilePage({this.user, this.userModel});
 
+
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }

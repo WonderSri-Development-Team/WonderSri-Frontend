@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ChangepasswordScreen extends StatefulWidget {
+  const ChangepasswordScreen({super.key});
+
   //const PasswordChangeScreen({Key? key}) : super(key: key);
 
   @override
@@ -302,7 +304,7 @@ class RequirementRow extends StatelessWidget {
   final bool isValid;
   final String text;
 
-  RequirementRow({required this.isValid, required this.text});
+  const RequirementRow({super.key, required this.isValid, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +328,7 @@ class RequirementRow extends StatelessWidget {
 class SecurityTipRow extends StatelessWidget {
   final String text;
 
-  SecurityTipRow(this.text);
+  const SecurityTipRow(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {

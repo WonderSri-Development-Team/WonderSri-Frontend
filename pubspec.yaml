@@ -37,18 +37,21 @@ dependencies:
   flutter_native_splash: ^2.4.4
   flutter_launcher_icons: ^0.14.3
   http: ^1.3.0
+
+  geolocator: ^13.0.2
+  permission_handler: ^11.3.1
+  geocoding: ^2.1.1
+  google_maps_flutter: ^2.10.0
+  flutter_dotenv: ^5.2.1
+  
  
   font_awesome_flutter: ^10.0.0
   url_launcher: ^6.1.6
 
   google_sign_in: ^6.2.2
   shared_preferences: ^2.5.2
+  provider: ^6.1.2
 
-  flutter_map: ^8.0.0
-  latlong2: ^0.9.1
-  geolocator: ^13.0.2
-  permission_handler: ^11.3.1
-  geocoding: ^2.1.1
 
 
 flutter_launcher_icons:
@@ -70,6 +73,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  url_launcher: ^6.1.10
+ 
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -88,8 +93,48 @@ flutter:
     - assets/images/logo-white.png
     - assets/images/google.png
     - assets/images/icon.png
+    - assets/images/benthota.jpg
+    - assets/images/GalleFort_1.jpg
+    - assets/images/hikkaduwa-beach.jpg
+    - assets/images/mirissa.jpg
     - assets/images/Splash.png
     - assets/images/Splash2.png
+    - .env
+
+    - assets/images/madu_river.jpg
+    - assets/images/knucles.jpg
+    - assets/images/kithulgala.jpg
+    - assets/images/jamiUl.jpg
+    - assets/images/nuwara-eliya.jpg
+
+    - assets/images/nuwara-eliya.jpg
+    - assets/images/kalaniya.jpg
+    - assets/images/sinharaja.jpg
+    - assets/images/trinco.jpg
+    - assets/images/piduruthalagala.jpg
+    - assets/images/yala.jpg
+    - assets/images/madu_river.jpg
+    - assets/images/kalaniya.jpg
+    - assets/images/sinharaja.jpg
+    - assets/images/aru.jpg
+    - assets/images/pinnawala.jpg
+    - assets/images/bundala.jpg
+    - assets/images/udawalwa.jpg
+    - assets/images/adams.jpg
+    - assets/images/polonnaruwa.jpg
+    - assets/images/ella.jpg
+    - assets/images/nilaveli.jpg
+    - assets/images/minneriya.jpg
+    - assets/images/horton.jpg
+    - assets/images/dabulla.jpg
+    - assets/images/jaffna.jpg
+    - assets/images/anuradapura.jpg
+    - assets/images/maligawa.jpg
+    - assets/images/ravana.jpg
+    - assets/images/sigiri.jpg
+   
+   
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
