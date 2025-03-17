@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/sign_in.dart';
-import 'package:frontend/screens/test_screen.dart';
+import 'package:frontend/screens/notifications_page.dart';
 import 'package:frontend/service/firebase/firebase_notification.dart';
 
 void main() async {
@@ -23,15 +23,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/',
+      initialRoute: '/notifications',
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(builder: (context) => const LoginPage());
           case '/home':
             return MaterialPageRoute(builder: (context) => const HomePage());
-          case '/test':
-            return MaterialPageRoute(builder: (context) => const TestScreen());
+          case '/notifications':
+            return MaterialPageRoute(builder: (context) => NotificationsPage());
           default:
             return null;
         }
