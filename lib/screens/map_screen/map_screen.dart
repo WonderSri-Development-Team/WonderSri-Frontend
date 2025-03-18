@@ -31,7 +31,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation(); // Only initialize if destinations are available
+    _getCurrentLocation();
     print("Map Destination : ${widget.destinations}");
   }
 
@@ -107,17 +107,17 @@ class _MapScreenState extends State<MapScreen> {
   void _checkDistance(){
     if(_currentLocation == null) return;
 
-    double distance = Geolocator.distanceBetween(
-      _currentLocation!.latitude,
-      _currentLocation!.longitude,
-      widget.destinations[_currentDestinationIndex].latitude,
-      widget.destinations[_currentDestinationIndex].longitude,
-    );
-
-    if(distance <= 20){
-      _showArrivalPopup();
+    if(widget.destinations.isNotEmpty) {
+      double distance = Geolocator.distanceBetween(
+        _currentLocation!.latitude,
+        _currentLocation!.longitude,
+        widget.destinations[_currentDestinationIndex].latitude,
+        widget.destinations[_currentDestinationIndex].longitude,
+      );
+      if(distance <= 20){
+        _showArrivalPopup();
+      }
     }
-
   }
 
   // the location description screen
