@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -398,11 +397,13 @@ class _HelpCenterState extends State<HelpCenter> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildSocialIcon(FontAwesomeIcons.facebook, 'https://facebook.com'),
+            _buildSocialIcon(FontAwesomeIcons.instagram,
+                'https://www.instagram.com/wonde_rsri?igsh=MWxsNTV2c2dkd3V2Zw=='),
             const SizedBox(width: 24),
-            _buildSocialIcon(FontAwesomeIcons.twitter, 'https://twitter.com'),
+            _buildSocialIcon(FontAwesomeIcons.youtube, 'https://youtube.com'),
             const SizedBox(width: 24),
-            _buildSocialIcon(FontAwesomeIcons.linkedin, 'https://linkedin.com'),
+            _buildSocialIcon(FontAwesomeIcons.linkedin,
+                'https://www.linkedin.com/company/wonder-sri/'),
           ],
         ),
         const SizedBox(height: 30),
