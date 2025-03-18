@@ -3,10 +3,10 @@ name: Flutter CI/CD
 on:
   push:
     branches:
-      - main  # Runs on pushes to the main branch
+      - main
   pull_request:
     branches:
-      - main  # Runs on PRs to the main branch
+      - main
 
 jobs:
   build:
@@ -20,13 +20,14 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.0'
+
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Run Tests
         run: flutter test
 
-      - name: Build APK
+      - name: Build Release APK
         run: flutter build apk --release
 
       - name: Upload APK as Artifact
@@ -34,3 +35,4 @@ jobs:
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
