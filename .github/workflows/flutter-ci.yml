@@ -31,15 +31,8 @@ jobs:
         run: flutter build apk --release
 
       - name: Upload APK as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2  # Changed from v3 to v2
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-
-
-      - name: Upload APK as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
+          if-no-files-found: error
