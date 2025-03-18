@@ -100,7 +100,6 @@ flutter:
     - assets/images/mirissa.jpg
     - assets/images/Splash.png
     - assets/images/Splash2.png
-    - .env
 
     - assets/images/madu_river.jpg
     - assets/images/knucles.jpg
