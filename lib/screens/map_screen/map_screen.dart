@@ -7,12 +7,9 @@ import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget{
 
-  final List<LatLng> destinations = [
-    LatLng(6.072573479583131, 80.19483309338364),
-    LatLng(6.073160996893892, 80.19715934877867),
-    LatLng(6.073844612355768, 80.19794478003057),
-  ];
+  final List<LatLng> destinations;
 
+  MapScreen({required this.destinations});
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -35,6 +32,16 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _getCurrentLocation();
+    print("Map Destination : ${widget.destinations}");
+  }
+
+  @override
+  void didUpdateWidget(MapScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.destinations.isNotEmpty && oldWidget.destinations.isEmpty) {
+      // If destinations were previously empty but are now populated, initialize
+      _getCurrentLocation();
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -64,7 +71,7 @@ class _MapScreenState extends State<MapScreen> {
       _currentLocation = LatLng(position.latitude, position.longitude);
     });
 
-    if (_currentLocation != null) {
+    if (_currentLocation != null && widget.destinations.isNotEmpty) {
       _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
     }
 
@@ -88,7 +95,9 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           _currentLocation = newLocation;
         });
-        _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
+        if (widget.destinations.isNotEmpty) {
+          _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
+        }
       }
       _checkDistance();
     });
@@ -98,17 +107,17 @@ class _MapScreenState extends State<MapScreen> {
   void _checkDistance(){
     if(_currentLocation == null) return;
 
-    double distance = Geolocator.distanceBetween(
-      _currentLocation!.latitude,
-      _currentLocation!.longitude,
-      widget.destinations[_currentDestinationIndex].latitude,
-      widget.destinations[_currentDestinationIndex].longitude,
-    );
-
-    if(distance <= 20){
-      _showArrivalPopup();
+    if(widget.destinations.isNotEmpty) {
+      double distance = Geolocator.distanceBetween(
+        _currentLocation!.latitude,
+        _currentLocation!.longitude,
+        widget.destinations[_currentDestinationIndex].latitude,
+        widget.destinations[_currentDestinationIndex].longitude,
+      );
+      if(distance <= 20){
+        _showArrivalPopup();
+      }
     }
-
   }
 
   // the location description screen
@@ -379,14 +388,11 @@ class _MapScreenState extends State<MapScreen> {
                         zoom: 15.0,
                       ),
                       markers: {
-                        // Marker(
-                        //   markerId: MarkerId('currentLocation'),
-                        //   position: _currentLocation!,
-                        // ),
-                        Marker(
-                          markerId: MarkerId('destination'),
-                          position: widget.destinations[_currentDestinationIndex],
-                        ),
+                        if(widget.destinations.isNotEmpty)
+                          Marker(
+                            markerId: MarkerId('destination'),
+                            position: widget.destinations[_currentDestinationIndex],
+                          ),
                       },
                       polylines: _polylines,
                       myLocationEnabled: true,

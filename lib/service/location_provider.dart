@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../service/location_service.dart';
+import '../service/web_socket_service.dart';
 
 class LocationProvider with ChangeNotifier {
   Position? _currentPosition;
   Stream<Position>? _positionStream;
+  final WebSocketService _webSocketService = WebSocketService();
 
   double? get latitude => _currentPosition?.latitude;
   double? get longitude => _currentPosition?.longitude;
@@ -36,6 +38,9 @@ class LocationProvider with ChangeNotifier {
       );
       notifyListeners(); // Notify UI to update
 
+      _webSocketService.sendLocation(_currentPosition!.latitude, _currentPosition!.longitude);
+      notifyListeners(); // Notify UI to update
+
       print("Initial Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}");
     } catch (e) {
       print("Error fetching initial location: $e");
@@ -53,6 +58,10 @@ class LocationProvider with ChangeNotifier {
     _positionStream!.listen((Position position) {
       _currentPosition = position;
       notifyListeners(); // Update UI when location changes
+
+      // Send live location updates to WebSocket
+      _webSocketService.sendLocation(position.latitude, position.longitude);
+      print("📤 Live Location Sent: ${position.latitude}, ${position.longitude}");
     });
   }
 }

@@ -3,6 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/nearby_location_model.dart';
 import 'package:frontend/service/location_services.dart' as location_service;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../service/navigation_controller.dart';
+
+import '../screens/map_screen/map_screen.dart';
 
 
 //import 'package:home_page/widgets/mock_location.dart';
@@ -119,6 +123,13 @@ class _NearbyLocationsWidgetState extends State<NearbyLocationsWidget> {
             // Handle location tap - you could navigate to a details page
             print('Tapped on location: ${location.name}');
             print('Coordinates: ${location.latitude}, ${location.longitude}');
+            print('Nearby Destinations: ${location.destinations}');
+
+            final navControllerState = context.findAncestorStateOfType<NavControllerState>();
+            if (navControllerState != null) {
+              // Pass the destinations from the location to NavController
+              navControllerState.updateDestination(location.destinations);
+            }
           },
           child: Row(
             children: [
