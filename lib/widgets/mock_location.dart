@@ -6,13 +6,13 @@ List<NearbyLocation> getMockLocations() {
   return [
     NearbyLocation(
       id: '1',
-      name: 'Central Park',
-      description: 'A beautiful urban park in the heart of the city',
+      name: 'IIT Building',
+      description: 'A beautiful university in Colombo',
       imageUrl: 'https://picsum.photos/200',
       latitude: 6.072573479583131,
       longitude: 80.19483309338364,
       timeAgo: '10 min ago',
-      destinations : [LatLng(6.072571590266452, 80.1947973928235),LatLng(6.073163010476026, 80.19716554462242),LatLng(6.069382009373173, 80.1981253244916),LatLng(6.064773562485583, 80.19837746523638)],
+      destinations : [LatLng(6.900075719698135, 79.85302328709948),LatLng(6.073163010476026, 80.19716554462242),LatLng(6.069382009373173, 80.1981253244916),LatLng(6.064773562485583, 80.19837746523638)],
     ),
     NearbyLocation(
       id: '2',
@@ -32,7 +32,7 @@ List<NearbyLocation> getMockLocations() {
       latitude: 40.7694,
       longitude: -73.9735,
       timeAgo: '30 min ago',
-      destinations : [LatLng(7.8731, 80.7718)],
+      destinations : [LatLng(6.899802956127544, 79.85369124225171),LatLng(6.894207038653864, 79.8546660786421)],
     ),
     NearbyLocation(
       id: '4',

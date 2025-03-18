@@ -1,2 +1,0 @@
-E:/L5/SDGP Implementation/WonderSri-Frontend/android/app/.cxx/Debug/1z563v4p/armeabi-v7a/CMakeFiles/edit_cache.dir
-E:/L5/SDGP Implementation/WonderSri-Frontend/android/app/.cxx/Debug/1z563v4p/armeabi-v7a/CMakeFiles/rebuild_cache.dir
