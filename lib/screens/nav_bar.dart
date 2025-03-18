@@ -57,8 +57,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: widget.currentIndex == 3 ? Color(0xFF2D46B9) : Colors.black,
+                  fontWeight: FontWeight.w900,
+                  color: widget.currentIndex == index? Color(0xFF2D46B9) : Colors.black,
                 ),
               ),
             ],
