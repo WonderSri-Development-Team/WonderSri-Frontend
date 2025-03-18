@@ -24,6 +24,11 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Set environment variables from secrets
+        run: |
+            echo "MY_API_KEY=${{ secrets.MY_API_KEY }}" >> $GITHUB_ENV
+            echo "DIRECTION_API_KEY=${{ secrets.DIRECTION_API_KEY }}" >> $GITHUB_ENV
+
       - name: Run Tests
         run: flutter test
 
