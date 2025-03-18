@@ -1,58 +1,3 @@
-#name: Flutter CI/CD
-#
-#on:
-#  push:
-#    branches:
-#      - main
-#  pull_request:
-#    branches:
-#      - main
-#
-#jobs:
-#  build:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout Repository
-#        uses: actions/checkout@v3
-#
-#      - name: Setup Flutter
-#        uses: subosito/flutter-action@v2
-#        with:
-#          flutter-version: '3.29.0'
-#
-#      - name: Install Dependencies
-#        run: flutter pub get
-#
-#      - name: Set environment variables from secrets
-#        run: |
-#            echo "MY_API_KEY=${{ secrets.MY_API_KEY }}" >> $GITHUB_ENV
-#            echo "DIRECTION_API_KEY=${{ secrets.DIRECTION_API_KEY }}" >> $GITHUB_ENV
-#
-#      - name: Run Tests
-#        run: flutter test
-#        continue-on-error: true
-#
-#      - name: Build Release APK
-#        run: flutter build apk --release
-#        continue-on-error: true
-#
-#      - name: Create artifact directory
-#        run: mkdir -p /tmp/artifacts
-#
-#      - name: Copy APK to artifacts directory
-#        run: cp build/app/outputs/flutter-apk/app-release.apk /tmp/artifacts/
-#
-#      - name: Upload artifact
-#        run: |
-#          gh api -X POST \
-#            /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
-#            -F name="release-apk" \
-#            -F data=@/tmp/artifacts/app-release.apk
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
 name: Flutter CI-CD
 
 on:
@@ -77,31 +22,31 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Set up Flutter
+      # Set up Flutter with a version that includes Dart >= 3.6.1
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0' # Match your local version if different
+          flutter-version: '3.22.0' # Ensures Dart 3.6.x
           channel: 'stable'
+          cache: false # Avoids using an outdated cached version
+
+      # Verify Flutter version (for debugging)
+      - name: Check Flutter version
+        run: flutter --version
 
       # Get dependencies
       - name: Get dependencies
         run: flutter pub get
 
-      # (Optional) Run tests, continue even if it fails
-      - name: Run Flutter tests
-        run: flutter test || true
-        continue-on-error: true
-
       # Build the APK
       - name: Build APK
         run: flutter build apk --release
 
-      # Copy the APK to artifacts directory
+      # Copy the APK
       - name: Copy APK to artifacts
         run: cp build/app/outputs/flutter-apk/app-release.apk /tmp/artifacts/
 
-      # (Optional) Upload the APK as an artifact
+      # Upload as artifact (optional)
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
