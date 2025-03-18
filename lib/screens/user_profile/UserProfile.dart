@@ -85,13 +85,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         : null,
                   ),
                   SizedBox(height: 12),
-                  Text(
-                    'Change Photo',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 16,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -118,8 +111,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   buildProfileItemCard('Date of Birth', _user.dateOfBirth,
                       Icons.calendar_today_outlined),
                   buildProfileItemCard(
-                      'Gender', _user.gender, Icons.people_outline),
-                  buildProfileItemCard(
                       'Location', _user.location, Icons.location_on_outlined),
                   buildProfileItemCard(
                       'Language', _user.language, Icons.language_outlined,
@@ -130,42 +121,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
             SizedBox(height: 24),
 
-            // Delete Account Button
-            // Delete Account Button
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: Color(0xFFE53935),
-                  size: 20,
-                ),
-                label: Text(
-                  'Delete Account',
-                  style: TextStyle(
-                    color: Color(0xFFE53935),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onPressed: () {
-                  showDeleteAccount();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Color(0xFFFFEBEE), // Very light red/pink background
-                  foregroundColor: Color(0xFFE53935),
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(
-                        color: Color(0xFFE53935).withOpacity(0.5), width: 1),
-                  ),
-                ),
-              ),
-            ),
             SizedBox(height: 24),
           ],
         ),
@@ -209,11 +164,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                     ],
                   ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: Colors.grey,
-                  size: 20,
                 ),
               ],
             ),
