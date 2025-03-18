@@ -30,9 +30,17 @@ jobs:
       - name: Build Release APK
         run: flutter build apk --release
 
-      - name: Upload APK as Artifact
-        uses: actions/upload-artifact@v2  # Changed from v3 to v2
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
+      - name: Create artifact directory
+        run: mkdir -p /tmp/artifacts
+
+      - name: Copy APK to artifacts directory
+        run: cp build/app/outputs/flutter-apk/app-release.apk /tmp/artifacts/
+
+      - name: Upload artifact 
+        run: |
+          gh api -X POST \
+            /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
+            -F name="release-apk" \
+            -F data=@/tmp/artifacts/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
