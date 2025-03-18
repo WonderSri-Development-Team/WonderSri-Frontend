@@ -6,7 +6,11 @@ import './service/location_provider.dart';
 
 
 void main() async {
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    print('No .env file found, using default or environment variables');
+  }
   final String mapsApiKey = dotenv.get('MAPS_API_KEY');
   runApp(
     MultiProvider(
