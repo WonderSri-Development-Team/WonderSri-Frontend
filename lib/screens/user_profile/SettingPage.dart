@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/helpCenter.dart';
-import 'package:frontend/screens/user_profile/EditProfilePage.dart';
+import 'package:frontend/screens/user_profile/EditProfilePage.dart'
+    as editProfile;
+import 'package:frontend/screens/user_profile/UserModel.dart';
+import 'package:frontend/screens/user_profile/UserProfile.dart';
+
 import 'package:frontend/screens/user_profile/changePassword_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import 'UserModel.dart';
+class SettingsPage extends StatefulWidget {
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
 
-class SettingsPage extends StatelessWidget {
+class _SettingsPageState extends State<SettingsPage> {
+  bool isDarkMode = false;
+  bool isNotificationsEnabled = false;
+
+  get userModel => null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,7 +27,7 @@ class SettingsPage extends StatelessWidget {
         backgroundColor: Color(0xFF2D46B9),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(28),
+        padding: EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -48,22 +61,29 @@ class SettingsPage extends StatelessWidget {
                         color: Colors.grey,
                       ),
                     ),
+                    // In SettingsPage.dart
                     TextButton(
                       onPressed: () {
-                        // Navigate to edit profile page
+                        // Create a User object with current user data
+                        final currentUser = User(
+                          fullName: 'John Doe', // Replace with actual data
+                          username: 'johndoe', // Replace with actual data
+                          email:
+                              'johndoe@example.com', // Replace with actual data
+                          phone: '+1234567890', // Replace with actual data
+                          dateOfBirth: '01/01/1990', // Replace with actual data
+                          gender: 'Male', // Replace with actual data
+                          location: 'Sri Lanka ', // Replace with actual data
+                          language: 'English', // Replace with actual data
+                        );
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EditProfilePage(
-                                user: User(
-                                    fullName: '',
-                                    username: '',
-                                    email: '',
-                                    phone: '',
-                                    dateOfBirth: '',
-                                    gender: '',
-                                    location: '',
-                                    language: '')), //  Open EditProfilePage
+                            builder: (context) => editProfile.EditProfilePage(
+                              user: currentUser,
+                              userModel: userModel,
+                            ),
                           ),
                         );
                       },
@@ -84,6 +104,27 @@ class SettingsPage extends StatelessWidget {
             buildSettingItem(
               'Personal Information',
               Icons.person,
+              onTap: () {
+                // Create a User object with current user data
+                final currentUser = User(
+                  fullName: 'John Doe', // Replace with actual user data
+                  username: 'johndoe',
+                  email: 'johndoe@example.com',
+                  phone: '+1234567890',
+                  dateOfBirth: '01/01/1990',
+                  gender: 'Male',
+                  location: 'New York',
+                  language: 'English',
+                );
+
+                // Navigate to the UserProfilePage
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserProfilePage(user: currentUser),
+                  ),
+                );
+              },
             ),
 
             //buildSettingItem('Password and Security', Icons.lock),
@@ -100,13 +141,16 @@ class SettingsPage extends StatelessWidget {
             ),
 
             buildSettingItem('Payments method ', Icons.payment),
-            buildSettingItem('Notification', Icons.notifications),
-            SizedBox(height: 25.0),
-            buildSettingTitle('App Preferences'),
-            buildSettingItem('Language', Icons.language),
-            buildSettingItem('Dark Theme', Icons.color_lens),
-            buildSettingItem('Location Services', Icons.location_on),
-            buildSettingItem('Currency', Icons.attach_money),
+            buildSettingItem(
+              'Notification',
+              Icons.notifications,
+              switchValue: isNotificationsEnabled,
+              onSwitchChanged: (value) {
+                setState(() {
+                  isNotificationsEnabled = value;
+                });
+              },
+            ),
             SizedBox(height: 25.0),
             buildSettingTitle('Support & Help'),
 
@@ -148,7 +192,8 @@ class SettingsPage extends StatelessWidget {
             ),
             SizedBox(height: 24.0),
             buildSettingTitle('App Information'),
-            buildSettingItem('About Us', Icons.info),
+            buildSettingItem('About Us', Icons.info,
+                url: 'https://wondersri-marketing.vercel.app'),
             buildSettingItem('Rate App', Icons.star),
             buildSettingItem('Share App', Icons.share),
             SizedBox(height: 24.0),
@@ -184,7 +229,11 @@ Widget buildSettingTitle(String title) {
 }
 
 //create setting item
-Widget buildSettingItem(String title, IconData icon, {VoidCallback? onTap}) {
+Widget buildSettingItem(String title, IconData icon,
+    {VoidCallback? onTap,
+    bool? switchValue,
+    Function(bool)? onSwitchChanged,
+    String? url}) {
   return ListTile(
     leading: Icon(
       icon,
@@ -197,11 +246,26 @@ Widget buildSettingItem(String title, IconData icon, {VoidCallback? onTap}) {
         color: Colors.black,
       ),
     ),
-    trailing: Icon(
-      Icons.arrow_forward_ios,
-      size: 16.0,
-      color: Colors.grey,
-    ),
-    onTap: onTap,
+    trailing: switchValue != null
+        ? Switch(
+            value: switchValue,
+            onChanged: onSwitchChanged,
+            activeColor: Color(0xFF2D46B9),
+          )
+        : Icon(
+            Icons.arrow_forward_ios,
+            size: 16.0,
+            color: Colors.grey,
+          ),
+    onTap: switchValue == null
+        ? (url != null
+            ? () async {
+                if (await canLaunchUrl(Uri.parse(url))) {
+                  await launchUrl(Uri.parse(url),
+                      mode: LaunchMode.externalApplication);
+                }
+              }
+            : onTap)
+        : null,
   );
 }

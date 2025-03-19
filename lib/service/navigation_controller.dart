@@ -4,40 +4,52 @@ import 'package:frontend/screens/nav_bar.dart';
 import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/user_profile/SettingPage.dart';
 import 'package:frontend/screens/map_screen//map_screen.dart';
-import 'package:frontend/screens/explorer/explorer_page.dart';
+
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import '../screens/explorer/explorer_page.dart';
 
 class NavController extends StatefulWidget{
-  const NavController({super.key});
-
   @override
-  State<NavController> createState() => _NavControllerState();
+  State<NavController> createState() => NavControllerState();
 }
 
-class _NavControllerState extends State<NavController>{
+class NavControllerState extends State<NavController>{
   int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    HomePage(),
-    MapScreen(),
-    ExplorerScreen(),
-    SettingsPage(),
+  List<LatLng> _destinations = [];  // Store destinations dynamically
 
 
-  ];
-
-  void _onTabSelected(int index) {
+  void onTabSelected(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+
+  // Method to update destinations dynamically
+  void updateDestination(List<LatLng> newDestination) {
+    setState(() {
+      _destinations = newDestination;
+      print("Updated Destinations: $_destinations");
+      _selectedIndex = 1; // Switch to MapScreen
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          HomePage(),
+          MapScreen(destinations: _destinations),
+          ExplorerScreen(),
+          SettingsPage(),
+        ],
+      ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
-        onTabSelected: _onTabSelected,
+        onTabSelected: onTabSelected,
       ),
     );
   }

@@ -50,6 +50,8 @@ dependencies:
 
   google_sign_in: ^6.2.2
   shared_preferences: ^2.5.2
+  provider: ^6.1.2
+  web_socket_channel: ^3.0.2
 
 
 
@@ -99,6 +101,40 @@ flutter:
     - assets/images/Splash.png
     - assets/images/Splash2.png
     - .env
+
+    - assets/images/madu_river.jpg
+    - assets/images/knucles.jpg
+    - assets/images/kithulgala.jpg
+    - assets/images/jamiUl.jpg
+    - assets/images/nuwara-eliya.jpg
+
+    - assets/images/nuwara-eliya.jpg
+    - assets/images/kalaniya.jpg
+    - assets/images/sinharaja.jpg
+    - assets/images/trinco.jpg
+    - assets/images/piduruthalagala.jpg
+    - assets/images/yala.jpg
+    - assets/images/madu_river.jpg
+    - assets/images/kalaniya.jpg
+    - assets/images/sinharaja.jpg
+    - assets/images/aru.jpg
+    - assets/images/pinnawala.jpg
+    - assets/images/bundala.jpg
+    - assets/images/udawalwa.jpg
+    - assets/images/adams.jpg
+    - assets/images/polonnaruwa.jpg
+    - assets/images/ella.jpg
+    - assets/images/nilaveli.jpg
+    - assets/images/minneriya.jpg
+    - assets/images/horton.jpg
+    - assets/images/dabulla.jpg
+    - assets/images/jaffna.jpg
+    - assets/images/anuradapura.jpg
+    - assets/images/maligawa.jpg
+    - assets/images/ravana.jpg
+    - assets/images/sigiri.jpg
+   
+   
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

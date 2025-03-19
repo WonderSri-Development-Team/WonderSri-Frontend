@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PasswordRequirements extends StatelessWidget {
-  const PasswordRequirements({Key? key}) : super(key: key);
+  const PasswordRequirements({super.key});
 
   @override
   Widget build(BuildContext context) {

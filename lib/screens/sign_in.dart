@@ -1,6 +1,6 @@
 
-import 'dart:convert';
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../screens/sign_up.dart';
@@ -18,11 +18,9 @@ class LoginPage extends StatefulWidget {
 
   @override
   _LoginPageState createState() => _LoginPageState();
-
 }
 
-class _LoginPageState extends State<LoginPage>{
-
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final ApiService apiService = ApiService();
@@ -141,7 +139,8 @@ class _LoginPageState extends State<LoginPage>{
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,   //ensure the screen resizes when the keyboard pop up
+      resizeToAvoidBottomInset:
+          true, //ensure the screen resizes when the keyboard pop up
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -150,52 +149,77 @@ class _LoginPageState extends State<LoginPage>{
           ),
         ),
         child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context,constraints) {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child:ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
-                  child:Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Column(
-                      children: [
-                        SizedBox(height: size.height * 0.1,),
-                        // logo
-                        Image.asset(
-                          "assets/images/logo-blue.png", //change the image
-                          height: size.height * 0.25, // Adjust size proportionally to screen height
-                          fit: BoxFit.contain,
-                        ),
+          child: LayoutBuilder(builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: size.height * 0.1,
+                      ),
+                      // logo
+                      Image.asset(
+                        "assets/images/logo-blue.png", //change the image
+                        height: size.height *
+                            0.25, // Adjust size proportionally to screen height
+                        fit: BoxFit.contain,
+                      ),
 
-                        SizedBox(height: size.height * 0.03,),
-                        // Welcome Text
-                        Text(
-                          "Welcome to WonderSri !\nYour personal e-tour guide.",
-                          textAlign: TextAlign.center,
+                      SizedBox(
+                        height: size.height * 0.03,
+                      ),
+                      // Welcome Text
+                      Text(
+                        "Welcome to WonderSri !\nYour personal e-tour guide.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black38,
+                            height: 1.2,
+                            fontWeight: FontWeight.w800),
+                      ),
+
+                      SizedBox(height: size.height * 0.04),
+                      // email password input area
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Login to your account",
                           style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.black38,
-                              height: 1.2,
-                              fontWeight: FontWeight.w800),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 17,
+                              color: Colors.black),
                         ),
+                      ),
+                      myTextFields(
+                          emailController, "Email", "Enter your email"),
+                      myTextFields(
+                          passwordController, "Password", "Enter your password",
+                          isPassword: true),
 
-                        SizedBox(height: size.height * 0.04),
-                        // email password input area
-                        Align(
-                          alignment: Alignment.centerLeft,
+                      // forgot password
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            // forgot password logic
+                          },
                           child: Text(
-                            "Login to your account",
+                            "Forgot password?",
                             style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 17,
-                                color: Colors.black),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Colors.black45),
                           ),
                         ),
-                        myTextFields(emailController, "Email", "Enter your email"),
-                        myTextFields(passwordController, "Password", "Enter your password", isPassword: true),
+                      ),
+
 
                               // forgot password
                         Align(
@@ -214,8 +238,16 @@ class _LoginPageState extends State<LoginPage>{
                                   fontSize: 14,
                                   color: Colors.black45),
                             ),
+
                           ),
+                          minimumSize: const Size.fromHeight(50),
                         ),
+                        child: const Text(
+                          "Sign in",
+                          style: TextStyle(fontSize: 22, color: Colors.white),
+                        ),
+                      ),
+
 
                         // sign in Button
                         ElevatedButton(
@@ -227,40 +259,65 @@ class _LoginPageState extends State<LoginPage>{
                               borderRadius: BorderRadius.circular(15),
                             ),
                             minimumSize: const Size.fromHeight(50),
+
                           ),
-                          child: const Text(
-                            "Sign in",
-                            style: TextStyle(fontSize: 22, color: Colors.white),
+                          Text(
+                            "  Or Sign in with  ",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black45,
+                                fontSize: 14),
                           ),
+                          Container(
+                            height: 2,
+                            width: size.width * 0.2,
+                            color: Colors.black45,
+                          ),
+                        ],
+                      ),
+
+                      // sign in options
+                      SizedBox(height: size.height * 0.02),
+
+                      ElevatedButton(
+                        // onPressed: isLoading ? null : _login,
+                        onPressed: () {
+                          // Navigate to SecondPage when button is clicked
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NavController()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 10, // Adds a shadow
+                          // backgroundColor: Color(tr),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          minimumSize: const Size.fromHeight(50),
                         ),
-
-                        SizedBox(height: size.height * 0.02),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Row(
                           children: [
-                            Container(
-                              height: 2,
-                              width: size.width * 0.2,
-                              color: Colors.black45,
+                            Image.asset(
+                              "assets/images/google.png", // Google icon
+                              height: 33,
                             ),
+                            Spacer(),
                             Text(
-                              "  Or Sign in with  ",
+                              "Sign in with Google", // text
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black45,
-                                  fontSize: 14),
+                                color: Colors.black45,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
-                            Container(
-                              height: 2,
-                              width: size.width * 0.2,
-                              color: Colors.black45,
-                            ),
+                            Spacer(),
                           ],
                         ),
+                      ),
 
-                              // sign in options
-                        SizedBox(height: size.height * 0.02),
+                      SizedBox(height: size.height * 0.02),
 
                         ElevatedButton(
                           onPressed: _handleGoogleSignIn,
@@ -271,72 +328,44 @@ class _LoginPageState extends State<LoginPage>{
                               borderRadius: BorderRadius.circular(15),
                             ),
                             minimumSize: const Size.fromHeight(50),
-                          ),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                "assets/images/google.png", // Google icon
-                                height: 33,
-                              ),
-                              Spacer(),
-                              Text(
-                                "Sign in with Google", // text
-                                style: TextStyle(
-                                  color: Colors.black45,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Spacer(),
-                            ],
-                          ),
-                        ),
 
-                        SizedBox(height: size.height * 0.02),
-
-                        Text.rich(
-                          TextSpan(
-                            text: "Don't have an account?",
-                            style: TextStyle(
-                              color: Colors.black45,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: " Sign up",
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SignUpPage()),
+                                  );
+                                },
                             ),
-                            children: [
-                              TextSpan(
-                                text: " Sign up",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => SignUpPage()),
-                                    );
-                                  },
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
-                        // SizedBox(height: size.height * 0.02),
-                      ],
-                    ),
+                      ),
+                      // SizedBox(height: size.height * 0.02),
+                    ],
                   ),
                 ),
-              );
-            }
-          ),
+              ),
+            );
+          }),
         ),
       ),
     );
   }
 
   // container for email and password input fields
-  Widget myTextFields(TextEditingController controller, String label, String hint,{bool isPassword = false}) {
+  Widget myTextFields(
+      TextEditingController controller, String label, String hint,
+      {bool isPassword = false}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 5),
       child: TextField(

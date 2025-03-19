@@ -1,11 +1,14 @@
-
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/nearby_location.dart';
 import 'package:frontend/widgets/popular_destinations.dart';
-
+import 'package:provider/provider.dart';
 import 'package:frontend/widgets/quick_bokking.dart';
+import '../service/location_provider.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -13,6 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomeScreenState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    final locationProvider = Provider.of<LocationProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hi John'),
@@ -32,16 +36,14 @@ class _HomeScreenState extends State<HomePage> {
               child: SearchBar(
                 hintText: 'Search for hotels, activities, or places',
                 leading: const Icon(Icons.search),
-                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
                   EdgeInsets.symmetric(horizontal: 16.0),
                 ),
               ),
             ),
             const QuickBookingSection(),
-
-            //const NearbyLocationsSection(),
-
             const PopularDestinationsSection(),
+            const NearbyLocationsWidget(),
           ],
         ),
       ),
