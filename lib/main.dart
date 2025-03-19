@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -5,14 +6,24 @@ import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/sign_in.dart';
 import 'package:frontend/screens/notifications_page.dart';
 import 'package:frontend/service/firebase/firebase_notification.dart';
+import 'package:frontend/service/location/geofence_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // load environment variables
+  // Load environment variables
   await dotenv.load();
-  // initialize firebase
+
+  // Initialize Firebase
   await _initializeFirebase();
+
+  // Fetch user's FCM token (should be retrieved dynamically in a real app)
+  String fcmToken = dotenv.env['FIRE'];  // Replace with actual token retrieval
+
+  // Check for nearby events every 10 minutes
+  Timer.periodic(Duration(minutes: 10), (Timer t) {
+    GeofenceService.checkNearbyEvents(fcmToken);
+  });
 
   runApp(const MyApp());
 }
