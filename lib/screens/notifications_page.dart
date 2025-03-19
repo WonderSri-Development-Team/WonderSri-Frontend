@@ -26,49 +26,33 @@ class NotificationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2, // Two tabs: Notifications & News
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Notifications"),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: "NOTIFICATIONS"),
-              Tab(text: "NEWS"),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            // Notifications Tab
-            ListView.separated(
-              itemCount: notifications.length,
-              separatorBuilder: (context, index) => const Divider(),
-              itemBuilder: (context, index) {
-                final notification = notifications[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(notification['image']!),
-                  ),
-                  title: Text(notification['title']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(notification['message']!),
-                  trailing: Text(notification['time']!,
-                      style: const TextStyle(color: Colors.grey)),
-                );
-              },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Notifications"),
+      ),
+      body: ListView.separated(
+        itemCount: notifications.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) {
+          final notification = notifications[index];
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(notification['image']!),
             ),
-            // News Tab (You can add content here)
-            const Center(child: Text("No News Available")),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // Add clear notifications or another action
-          },
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.close),
-        ),
+            title: Text(notification['title']!,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(notification['message']!),
+            trailing: Text(notification['time']!,
+                style: const TextStyle(color: Colors.grey)),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add clear notifications or another action
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.close),
       ),
     );
   }
