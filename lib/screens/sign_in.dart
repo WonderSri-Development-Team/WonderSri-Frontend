@@ -1,8 +1,17 @@
+
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../screens/sign_up.dart';
 import 'package:frontend/service/navigation_controller.dart';
 import 'package:frontend/service/api_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../service/ForgotPasswordPage.dart';
+
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,32 +27,110 @@ class _LoginPageState extends State<LoginPage> {
 
   bool isLoading = false;
 
-  void _login() async {
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> _login() async {
+    // backend URL for login
+    final String apiUrl = "https://wondersri-backend.onrender.com/auth/login/";
 
-    try {
-      final response = await apiService.login(
-        emailController.text,
-        passwordController.text,
-      );
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": emailController.text,
+        "password": passwordController.text,
+      }),
+    );
 
-      // Save token if needed (e.g., SharedPreferences)
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      print("User authenticated: ${responseData['token']}");
 
-      // Navigate to home page
+      // Store the authentication token
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', responseData['token']);
+
+      // Navigate to the home screen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => NavController()),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
+    } else {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      _showDialog("Error", responseData["error"] ?? "Login failed.");
+    }
+  }
+
+  void _showDialog(String title, String message, [VoidCallback? onOkPressed]) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onOkPressed != null) {
+                  onOkPressed();
+                }
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+  );
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return; // User canceled sign-in.
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw Exception("Failed to get Google ID Token");
+      }
+
+      print("Google ID Token: $idToken");
+
+      // Send ID Token to your backend
+      final response = await http.post(
+        Uri.parse('https://wondersri-backend.onrender.com/auth/google-login/'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"id_token": idToken}),
+      );
+
+      print("Google Sign-In Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("User authenticated: ${data['token']}");
+
+        // Store the authentication token
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', data['token']);
+
+        // Navigate to the home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NavController()),
+        );
+
+      } else {
+        print("Failed to authenticate: ${response.body}");
+      }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login failed: ${error.toString()}")),
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+      print("Google Sign-In error: $error");
     }
   }
 
@@ -133,22 +220,25 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      // sign in Button
-                      ElevatedButton(
-                        // onPressed: isLoading ? null : _login,
-                        onPressed: () {
-                          // Navigate to SecondPage when button is clicked
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NavController()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          elevation: 10, // Adds a shadow
-                          backgroundColor: Color(0xFF2D46B9),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+
+                              // forgot password
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                              );
+                            },
+                            child: Text(
+                              "Forgot password?",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.black45),
+                            ),
+
                           ),
                           minimumSize: const Size.fromHeight(50),
                         ),
@@ -158,15 +248,18 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      SizedBox(height: size.height * 0.02),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            height: 2,
-                            width: size.width * 0.2,
-                            color: Colors.black45,
+                        // sign in Button
+                        ElevatedButton(
+                          onPressed: isLoading ? null : _login,
+                          style: ElevatedButton.styleFrom(
+                            elevation: 10, // Adds a shadow
+                            backgroundColor: Color(0xFF2D46B9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            minimumSize: const Size.fromHeight(50),
+
                           ),
                           Text(
                             "  Or Sign in with  ",
@@ -226,13 +319,16 @@ class _LoginPageState extends State<LoginPage> {
 
                       SizedBox(height: size.height * 0.02),
 
-                      Text.rich(
-                        TextSpan(
-                          text: "Don't have an account?",
-                          style: TextStyle(
-                            color: Colors.black45,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                        ElevatedButton(
+                          onPressed: _handleGoogleSignIn,
+                          style: ElevatedButton.styleFrom(
+                            elevation: 10, // Adds a shadow
+                            // backgroundColor: Color(tr),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            minimumSize: const Size.fromHeight(50),
+
                           ),
                           children: [
                             TextSpan(
