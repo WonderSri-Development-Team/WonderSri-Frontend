@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,12 +19,15 @@ void main() async {
   await _initializeFirebase();
 
   // Fetch user's FCM token (should be retrieved dynamically in a real app)
-  String fcmToken = dotenv.env['FIRE'];  // Replace with actual token retrieval
+  String? fcmToken = await FirebaseMessaging.instance
+      .getToken(); // Replace with actual token retrieval
 
   // Check for nearby events every 10 minutes
-  Timer.periodic(Duration(minutes: 10), (Timer t) {
-    GeofenceService.checkNearbyEvents(fcmToken);
-  });
+  if (fcmToken != null) {
+    Timer.periodic(Duration(minutes: 10), (Timer t) {
+      GeofenceService.checkNearbyEvents(fcmToken!);
+    });
+  }
 
   runApp(const MyApp());
 }
