@@ -208,7 +208,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context); // Close the alert
+                    Navigator.of(context).pop(); // Close the alert
                     _showLocationDescription(context); // Show draggable sheet
                     // setState(() {
                     //   _alertShow = false;
@@ -239,7 +239,7 @@ class _MapScreenState extends State<MapScreen> {
           content: Text("You have reached all destinations."),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.of(context).pop(),
               child: Text("OK"),
             ),
           ],

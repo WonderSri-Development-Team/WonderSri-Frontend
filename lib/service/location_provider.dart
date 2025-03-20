@@ -13,7 +13,6 @@ class LocationProvider with ChangeNotifier {
   Position? get currentPosition => _currentPosition;
 
   LocationProvider() {
-    _startListening(); // Start listening when the provider is initialized
     _fetchCurrentLocation();
   }
 
@@ -38,30 +37,21 @@ class LocationProvider with ChangeNotifier {
       );
       notifyListeners(); // Notify UI to update
 
-      _webSocketService.sendLocation(_currentPosition!.latitude, _currentPosition!.longitude);
-      notifyListeners(); // Notify UI to update
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 1, // Update when user moves 1 meter
+        ),
+      );
 
-      print("Initial Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}");
+      _positionStream!.listen((Position position) {
+        _currentPosition = position;
+        notifyListeners();
+        print("Updated Location: ${position.latitude}, ${position.longitude}");
+      });
+
     } catch (e) {
       print("Error fetching initial location: $e");
     }
-  }
-
-  void _startListening() {
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 1, // Update location only if user moves  meters
-      ),
-    );
-
-    _positionStream!.listen((Position position) {
-      _currentPosition = position;
-      notifyListeners(); // Update UI when location changes
-
-      // Send live location updates to WebSocket
-      _webSocketService.sendLocation(position.latitude, position.longitude);
-      print("📤 Live Location Sent: ${position.latitude}, ${position.longitude}");
-    });
   }
 }

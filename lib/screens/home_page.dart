@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomePage> {
             ),
             const QuickBookingSection(),
             const PopularDestinationsSection(),
-            const NearbyLocationsWidget(),
+            // const NearbyLocationsWidget(),
             const Nearby()
           ],
         ),
