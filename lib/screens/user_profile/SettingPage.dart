@@ -8,6 +8,7 @@ import 'package:frontend/screens/user_profile/UserProfile.dart';
 import 'package:frontend/screens/user_profile/changePassword_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+
 class SettingsPage extends StatefulWidget {
   @override
   _SettingsPageState createState() => _SettingsPageState();
