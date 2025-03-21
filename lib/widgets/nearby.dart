@@ -32,11 +32,12 @@ class _NearbyState extends State<Nearby> {
         Uri.parse('wss://wondersri-backend-6475.onrender.com/ws/location/'),
       );
 
-      _channel.stream.listen(
-            (message) {
-          handleResponse(message);
+      _channel.stream.listen((message) {
+            print("📥 Received WebSocket Message: $message");
+            handleResponse(message);
         },
         onError: (error) {
+          print("❌ WebSocket Error: $error");
           setState(() {
             _isConnected = false;
             _connectionStatus = 'Error: $error';
@@ -44,6 +45,7 @@ class _NearbyState extends State<Nearby> {
           });
         },
         onDone: () {
+          print("⚡ WebSocket Connection Closed. Code: ${_channel.closeCode}, Reason: ${_channel.closeReason}");
           setState(() {
             _isConnected = false;
             _connectionStatus = 'Disconnected';
@@ -54,12 +56,32 @@ class _NearbyState extends State<Nearby> {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         sendLocationData();
+        _startPeriodicUpdates();
       });
     } catch (e) {
       setState(() {
         _connectionStatus = 'Connection failed: $e';
       });
+      _reconnect();
     }
+  }
+
+  void _startPeriodicUpdates() {
+    Future.delayed(Duration(seconds: 10), () {
+      if (_isConnected && mounted) {
+        sendLocationData();
+        _startPeriodicUpdates(); // Recursive call for continuous updates
+      }
+    });
+  }
+
+  void _reconnect() {
+    Future.delayed(Duration(seconds: 2), () {
+      if (!_isConnected && mounted) {
+        print("Attempting to reconnect...");
+        connectToWebSocket();
+      }
+    });
   }
 
   void sendLocationData() {
@@ -68,7 +90,10 @@ class _NearbyState extends State<Nearby> {
     final longitude = locationProvider.longitude;
 
     if (latitude == null || longitude == null) {
-      print('Location not available yet');
+      print('Location not available yet, retrying in 1 second...');
+      Future.delayed(Duration(seconds: 1), () {
+        if (mounted) sendLocationData(); // Retry after delay
+      });
       setState(() {
         _connectionStatus = 'Waiting for location...';
       });
@@ -82,20 +107,8 @@ class _NearbyState extends State<Nearby> {
     };
 
     _channel.sink.add(jsonEncode(locationData));
-    print("WebSocket Live location: $latitude, $longitude");
+    print("📤 WebSocket Live location sent: $latitude, $longitude");
   }
-
-  // void sendLocationData() {
-  //   // Hardcoded coordinates for testing
-  //   final locationData = {
-  //     "type": "nearbygeofences",
-  //     "latitude": 6.032923,
-  //     "longitude": 80.217622,
-  //   };
-  //
-  //   _channel.sink.add(jsonEncode(locationData));
-  //   print("Sent location: ${locationData['latitude']}, ${locationData['longitude']}");
-  // }
 
   LatLng parseMainPoint(String mainPoint) {
     // Extract the part inside the parentheses
