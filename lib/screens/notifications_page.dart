@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -64,6 +63,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     _saveNotifications();
   }
 
+  void _clearNotifications() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('notifications');
+    setState(() {
+      notifications.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,6 +91,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 style: const TextStyle(color: Colors.grey)),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _clearNotifications,
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.close),
       ),
     );
   }
