@@ -21,7 +21,7 @@ class FirebaseNotification {
     importance: Importance.high,
   );
 
-  // ✅ INITIALIZE NOTIFICATIONS
+  // INITIALIZE NOTIFICATIONS
   Future<void> initNotification() async {
     if (_isInitialized) return; // Prevent re-initialization
 
@@ -33,7 +33,7 @@ class FirebaseNotification {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('✅ User granted permission for notifications.');
+      print('User granted permission for notifications.');
 
       // Android settings
       const AndroidInitializationSettings androidInitSettings =
@@ -57,7 +57,7 @@ class FirebaseNotification {
       await _flutterLocalNotificationsPlugin.initialize(
         initSettings,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
-          print('🔔 Notification tapped: ${response.payload}');
+          print('Notification tapped: ${response.payload}');
         },
       );
 
@@ -70,16 +70,16 @@ class FirebaseNotification {
       _isInitialized = true;
     }
 
-    // ✅ Retrieve & Send FCM Token
+    // Retrieve & Send FCM Token
     final String? token = await _firebaseMessaging.getToken();
     if (token != null) {
-      print('📌 FCM Token: $token');
+      print('FCM Token: $token');
       await _sendTokenToBackend(token);
     }
 
-    // ✅ Handle Notifications in Foreground
+    // Handle Notifications in Foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("📩 New FCM Notification: ${message.notification?.title}");
+      print("New FCM Notification: ${message.notification?.title}");
 
       // Show local notification when the app is in the foreground
       showNotification(
@@ -88,20 +88,20 @@ class FirebaseNotification {
       );
     });
 
-    // ✅ Handle Notification Tap (When App is Terminated or in Background)
+    // Handle Notification Tap (When App is Terminated or in Background)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print("🚀 User opened notification: ${message.notification?.title}");
+      print("User opened notification: ${message.notification?.title}");
       // Add logic to navigate the user based on notification data
     });
 
     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
-        print("🚀 App launched by tapping notification: ${message.notification?.title}");
+        print("App launched by tapping notification: ${message.notification?.title}");
       }
     });
   }
 
-  // ✅ SEND FCM TOKEN TO DJANGO
+  // SEND FCM TOKEN TO DJANGO
   Future<void> _sendTokenToBackend(String token) async {
     final String apiUrl = dotenv.env['DJANGO_API_URL']! + "/api/notifications/register-device/";
 
@@ -112,13 +112,13 @@ class FirebaseNotification {
     );
 
     if (response.statusCode == 201) {
-      print("✅ FCM Token registered successfully.");
+      print("FCM Token registered successfully.");
     } else {
-      print("❌ Error registering FCM Token: ${response.body}");
+      print("Error registering FCM Token: ${response.body}");
     }
   }
 
-  // ✅ SHOW LOCAL NOTIFICATION (When App is Open)
+  // SHOW LOCAL NOTIFICATION (When App is Open)
   Future<void> showNotification({int id = 0, String? title, String? body}) async {
     return _flutterLocalNotificationsPlugin.show(
       id,
