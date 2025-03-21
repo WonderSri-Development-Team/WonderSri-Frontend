@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'notifications_page.dart'; // Import the notifications page
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -29,10 +30,8 @@ class _HomeScreenState extends State<HomeScreen>{
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
-              SizedBox(height: size.height*0.04),
-
+              SizedBox(height: size.height * 0.04),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 // here fetch user's name--------------------------------------------------------
@@ -44,40 +43,45 @@ class _HomeScreenState extends State<HomeScreen>{
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  // Notification icon and settings icon
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end, // Align icons to the right
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Stack(
-                        children: [
-                          Icon(Icons.notification_add_outlined, size: 30, color: Color(0xFF2D46B9)),
-                          Positioned(
-                            top: 2,
-                            right: 2,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotificationsPage(),
+                            ),
+                          );
+                        },
+                        child: Stack(
+                          children: [
+                            const Icon(Icons.notifications_outlined,
+                                size: 30, color: Color(0xFF2D46B9)),
+                            Positioned(
+                              top: 2,
+                              right: 2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      const SizedBox(width: 20), // Adjust space between icons
-                      Icon(Icons.settings, size: 30, color: Color(0xFF2D46B9)),
+                      const SizedBox(width: 20),
+                      const Icon(Icons.settings,
+                          size: 30, color: Color(0xFF2D46B9)),
                     ],
-                  )
-
+                  ),
                 ],
               ),
-
-
-
-              SizedBox(height: size.height*0.02),
-              // Search bar
+              SizedBox(height: size.height * 0.02),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -87,29 +91,25 @@ class _HomeScreenState extends State<HomeScreen>{
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color(0xFF2D46B9), width: 2)
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: const BorderSide(
+                            color: Color(0xFF2D46B9), width: 2)),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 10),
                   ),
                 ),
               ),
-
-              SizedBox(height: size.height*0.02),
-
-              Text(
-                  "You are currently in",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w800,
-                  ),
-              ),
-
-
               SizedBox(height: size.height * 0.02),
-
+              Text(
+                "You are currently in",
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(height: size.height * 0.02),
             ],
           ),
         ),
