@@ -62,46 +62,87 @@ class _NearbyState extends State<Nearby> {
     }
   }
 
-  // void sendLocationData() {
-  //   final locationProvider = Provider.of<LocationProvider>(context, listen: false);
-  //   final latitude = locationProvider.latitude;
-  //   final longitude = locationProvider.longitude;
-  //
-  //   if (latitude == null || longitude == null) {
-  //     print('Location not available yet');
-  //     setState(() {
-  //       _connectionStatus = 'Waiting for location...';
-  //     });
-  //     return;
-  //   }
-  //
-  //   final locationData = {
-  //     "type": "nearbygeofences",
-  //     "latitude": latitude,
-  //     "longitude": longitude,
-  //   };
-  //
-  //   _channel.sink.add(jsonEncode(locationData));
-  //   print("Live location: $latitude, $longitude");
-  // }
-
   void sendLocationData() {
-    // Hardcoded coordinates for testing
+    final locationProvider = Provider.of<LocationProvider>(context, listen: false);
+    final latitude = locationProvider.latitude;
+    final longitude = locationProvider.longitude;
+
+    if (latitude == null || longitude == null) {
+      print('Location not available yet');
+      setState(() {
+        _connectionStatus = 'Waiting for location...';
+      });
+      return;
+    }
+
     final locationData = {
       "type": "nearbygeofences",
-      "latitude": 6.032923,
-      "longitude": 80.217622,
+      "latitude": latitude,
+      "longitude": longitude,
     };
 
     _channel.sink.add(jsonEncode(locationData));
-    print("Sent location: ${locationData['latitude']}, ${locationData['longitude']}");
+    print("WebSocket Live location: $latitude, $longitude");
+  }
+
+  // void sendLocationData() {
+  //   // Hardcoded coordinates for testing
+  //   final locationData = {
+  //     "type": "nearbygeofences",
+  //     "latitude": 6.032923,
+  //     "longitude": 80.217622,
+  //   };
+  //
+  //   _channel.sink.add(jsonEncode(locationData));
+  //   print("Sent location: ${locationData['latitude']}, ${locationData['longitude']}");
+  // }
+
+  LatLng parseMainPoint(String mainPoint) {
+    // Extract the part inside the parentheses
+    final pointString = mainPoint.split('(')[1].split(')')[0];
+
+    // Split the longitude and latitude
+    final coordinates = pointString.split(' ');
+
+    // Convert to double
+    final longitude = double.parse(coordinates[0]);
+    final latitude = double.parse(coordinates[1]);
+
+    return LatLng(latitude, longitude);
   }
 
   void handleResponse(String message) {
     Map<String, dynamic> response = jsonDecode(message);
     if (response['type'] == 'nearbygeofences') {
       List<Geofence> geofences = (response['nearby_geofences'] as List)
-          .map((json) => Geofence.fromJson(json))
+          .map((json) {
+        // Parse the main_point for the main geofence
+        final mainPoint = json['main_point'];
+        LatLng? mainPointLatLng;
+        try {
+          mainPointLatLng = parseMainPoint(mainPoint);
+        } catch (e) {
+          print('Failed to parse main_point for ${json['name']}: $e');
+        }
+
+        // Parse the main_point for each sub-geofence
+        final subGeofences = json['sub_geofences'] as List?;
+        final parsedSubGeofences = subGeofences?.map((subJson) {
+          final subMainPoint = subJson['main_point'];
+          LatLng? subMainPointLatLng;
+          try {
+            subMainPointLatLng = parseMainPoint(subMainPoint);
+          } catch (e) {
+            print('Failed to parse main_point for sub-geofence ${subJson['name']}: $e');
+          }
+          return Geofence.fromJson(subJson)..mainPointLatLng = subMainPointLatLng;
+        }).toList();
+
+        // Create a Geofence object with the parsed main_point and sub-geofences
+        return Geofence.fromJson(json)
+          ..mainPointLatLng = mainPointLatLng
+          ..subGeofences = parsedSubGeofences;
+      })
           .toList();
 
       setState(() {
@@ -112,16 +153,32 @@ class _NearbyState extends State<Nearby> {
     }
   }
 
-  List<LatLng> getGeofenceDestinations(Geofence geofence) {
-    List<LatLng> destinations = [];
+  List<Map<String, dynamic>> getGeofenceDestinations(Geofence geofence) {
+    List<Map<String, dynamic>> destinations = [];
 
-    // Include the main geofence coordinate
-    destinations.add(LatLng(geofence.firstLatitude, geofence.firstLongitude));
+    // Include the main geofence coordinate if available
+    if (geofence.mainPointLatLng != null) {
+      destinations.add({
+        'latLng': geofence.mainPointLatLng!,
+        'name': geofence.name,
+        'description': geofence.description,
+      });
+    } else {
+      print('Main point coordinates are null for ${geofence.name}');
+    }
 
-    // Add all sub-geofence coordinates
+    // Add all sub-geofence coordinates if available
     if (geofence.subGeofences != null && geofence.subGeofences!.isNotEmpty) {
       for (var subGeofence in geofence.subGeofences!) {
-        destinations.add(LatLng(subGeofence.firstLatitude, subGeofence.firstLongitude));
+        if (subGeofence.mainPointLatLng != null) {
+          destinations.add({
+            'latLng': subGeofence.mainPointLatLng!,
+            'name': subGeofence.name,
+            'description': subGeofence.description,
+          });
+        } else {
+          print('Sub-geofence coordinates are null for ${subGeofence.name}');
+        }
       }
     }
 
@@ -130,13 +187,25 @@ class _NearbyState extends State<Nearby> {
     if (destinations.isEmpty) {
       print('  No sub-locations available');
     } else {
-      for (var latLng in destinations) {
-        print('  LatLng(${latLng.latitude}, ${latLng.longitude}),');
+      for (var destination in destinations) {
+        print('  LatLng(${destination['latLng'].latitude}, ${destination['latLng'].longitude})');
+        print('  Name: ${destination['name']}');
+        print('  Description: ${destination['description']}');
       }
     }
     print(']');
 
     return destinations;
+  }
+
+  void _navigateToMap(Geofence geofence, NavControllerState? navControllerState) {
+    final destinations = getGeofenceDestinations(geofence);
+
+    if (navControllerState != null) {
+      navControllerState.updateDestinationWithGeofences(destinations);
+    } else {
+      print('Error: NavControllerState not found');
+    }
   }
 
   @override
@@ -189,17 +258,14 @@ class _NearbyState extends State<Nearby> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '(${geofence.firstLatitude.toStringAsFixed(6)}, ${geofence.firstLongitude.toStringAsFixed(6)})',
+                    geofence.mainPointLatLng != null
+                        ? '(${geofence.mainPointLatLng!.latitude.toStringAsFixed(6)}, ${geofence.mainPointLatLng!.longitude.toStringAsFixed(6)})'
+                        : 'Coordinates not available',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   trailing: TextButton(
                     onPressed: () {
-                      final destinations = getGeofenceDestinations(geofence);
-                      if (navControllerState != null) {
-                        navControllerState.updateDestination(destinations);
-                      } else {
-                        print('Error: NavControllerState not found');
-                      }
+                      _navigateToMap(geofence, navControllerState);
                     },
                     child: const Text('Visit the Place'),
                   ),
@@ -208,7 +274,9 @@ class _NearbyState extends State<Nearby> {
                     return ListTile(
                       title: Text(subGeofence.name),
                       subtitle: Text(
-                        '(${subGeofence.firstLatitude.toStringAsFixed(6)}, ${subGeofence.firstLongitude.toStringAsFixed(6)})',
+                        subGeofence.mainPointLatLng != null
+                            ? '(${subGeofence.mainPointLatLng!.latitude.toStringAsFixed(6)}, ${subGeofence.mainPointLatLng!.longitude.toStringAsFixed(6)})'
+                            : 'Coordinates not available',
                         style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       dense: true,

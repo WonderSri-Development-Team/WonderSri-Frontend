@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_launcher_icons/constants.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:frontend/models/geofence.dart';
 
 class MapScreen extends StatefulWidget{
 
-  final List<LatLng> destinations;
+  final List<Map<String, dynamic>> destinations;
 
   MapScreen({required this.destinations});
 
@@ -25,6 +29,7 @@ class _MapScreenState extends State<MapScreen> {
 
   List<String> _instructions = [];
   Stream<Position>? _positionStream;
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   int _currentDestinationIndex = 0;
 
@@ -32,17 +37,24 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _getCurrentLocation();
-    print("Map Destination : ${widget.destinations}");
   }
 
   @override
-  void didUpdateWidget(MapScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.destinations.isNotEmpty && oldWidget.destinations.isEmpty) {
-      // If destinations were previously empty but are now populated, initialize
+  void dispose() {
+    // Cancel the subscription when the widget is disposed
+    _positionStreamSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reinitialize the stream when the screen is resumed
+    if (_positionStreamSubscription == null || _positionStreamSubscription!.isPaused) {
       _getCurrentLocation();
     }
   }
+
 
   Future<void> _getCurrentLocation() async {
     // Check if location services are enabled
@@ -72,14 +84,14 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     if (_currentLocation != null && widget.destinations.isNotEmpty) {
-      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
+      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLng']);
     }
 
     // Listen for location changes
     _positionStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
         accuracy: LocationAccuracy.best,
-        distanceFilter: 1, // Updates every 10 meters-----------------------------------------------
+        distanceFilter: 1, // Updates every 1 meter-----------------------------------------------
       ),
     );
 
@@ -96,7 +108,7 @@ class _MapScreenState extends State<MapScreen> {
           _currentLocation = newLocation;
         });
         if (widget.destinations.isNotEmpty) {
-          _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
+          _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLng']);
         }
       }
       _checkDistance();
@@ -111,8 +123,8 @@ class _MapScreenState extends State<MapScreen> {
       double distance = Geolocator.distanceBetween(
         _currentLocation!.latitude,
         _currentLocation!.longitude,
-        widget.destinations[_currentDestinationIndex].latitude,
-        widget.destinations[_currentDestinationIndex].longitude,
+        widget.destinations[_currentDestinationIndex]['latLng'].latitude,
+        widget.destinations[_currentDestinationIndex]['latLng'].longitude,
       );
       if(distance <= 20){
         _showArrivalPopup();
@@ -121,7 +133,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // the location description screen
-  void _showLocationDescription(BuildContext context) {
+  void _showLocationDescription(BuildContext context,String description) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allows it to cover 3/4 of the screen
@@ -152,25 +164,16 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Galle Fort",
+                  "Hi there",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Galle Fort is a historical site in Sri Lanka, originally built by the Portuguese and later fortified by the Dutch...",
+                  description,
                   style: TextStyle(fontSize: 16),
                 ),
                 SizedBox(height: 20),
-                Text(
-                  "Location Details",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "• Built in the 16th century\n• UNESCO World Heritage Site\n• Famous for colonial architecture",
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 20),
+
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text("Close"),
@@ -193,7 +196,7 @@ class _MapScreenState extends State<MapScreen> {
         context: context,
         builder: (context) =>
             AlertDialog(
-              title: Text("You have arrived to a Location!"),
+              title: Text("You have arrived at"),
               content: Text("Would you like to know about this location?"),
               actions: [
                 TextButton(
@@ -209,7 +212,11 @@ class _MapScreenState extends State<MapScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the alert
-                    _showLocationDescription(context); // Show draggable sheet
+                    if(widget.destinations[_currentDestinationIndex]['description'].isNotEmpty) {
+                      _showLocationDescription(context, widget.destinations[_currentDestinationIndex]['description']);
+                    }else{
+                      _showLocationDescription(context, "No description available");
+                    }
                     // setState(() {
                     //   _alertShow = false;
                     // });
@@ -229,7 +236,9 @@ class _MapScreenState extends State<MapScreen> {
         _currentDestinationIndex++; // Move to the next destination
         _alertShow = false; // Reset the alert flag
       });
-      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
+      if(widget.destinations.isNotEmpty) {
+        _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLang']);
+      }
     } else {
       // All destinations reached
       showDialog(
@@ -361,7 +370,9 @@ class _MapScreenState extends State<MapScreen> {
       _showInstructions = true; // Show instructions in the lower half
     });
 
-    _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]);
+    if(widget.destinations.isNotEmpty) {
+      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLang']);
+    }
   }
 
 
@@ -388,10 +399,10 @@ class _MapScreenState extends State<MapScreen> {
                         zoom: 15.0,
                       ),
                       markers: {
-                        if(widget.destinations.isNotEmpty)
+                        if(widget.destinations[_currentDestinationIndex]['latLang'] != null)
                           Marker(
                             markerId: MarkerId('destination'),
-                            position: widget.destinations[_currentDestinationIndex],
+                            position: widget.destinations[_currentDestinationIndex]['latLang'],
                           ),
                       },
                       polylines: _polylines,
