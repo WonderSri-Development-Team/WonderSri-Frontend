@@ -1,0 +1,2 @@
+E:/L5/SDGP Implementation/WonderSri-Frontend/android/app/.cxx/RelWithDebInfo/r426l2o2/x86/CMakeFiles/edit_cache.dir
+E:/L5/SDGP Implementation/WonderSri-Frontend/android/app/.cxx/RelWithDebInfo/r426l2o2/x86/CMakeFiles/rebuild_cache.dir

@@ -35,7 +35,6 @@ class EditProfilePage extends StatefulWidget {
 
   EditProfilePage({this.user, this.userModel});
 
-
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
@@ -231,6 +230,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 hintText: 'Enter your phone number'),
             _buildTextField('Date Of Birth', _dateOfBirthController,
                 hintText: 'Enter your date of birth'),
+            _buildSectionTitle('Additional Information'),
+            _buildTextField('Location', _locationController,
+                hintText: 'Enter your location'),
+            _buildTextField('Language', _languageController,
+                hintText: 'Enter your language'),
             _buildSectionTitle('Privacy Settings'),
             SwitchListTile(
               title: const Text('Private Account'),
