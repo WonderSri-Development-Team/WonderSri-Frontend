@@ -1,3 +1,6 @@
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/user_profile/EditProfilePage.dart';
 import 'package:frontend/screens/user_profile/UserModel.dart' as model;
@@ -35,7 +38,6 @@ class EditProfilePage extends StatefulWidget {
 
   EditProfilePage({this.user, this.userModel});
 
-
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
@@ -51,6 +53,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   bool _isPrivateAccount = false;
   bool _isActivityStatusEnabled = true;
+
+  File? _profileImage;
 
   @override
   void initState() {
@@ -206,14 +210,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
         padding: const EdgeInsets.all(25.0),
         child: Column(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 40,
-              backgroundImage: AssetImage('assets/profile_picture.png'),
+              backgroundImage: _profileImage != null
+                  ? FileImage(_profileImage!) as ImageProvider
+                  : const AssetImage('assets/profile_picture.png'),
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 // Add photo change functionality
+                final ImagePicker picker = ImagePicker();
+                final XFile? image =
+                    await picker.pickImage(source: ImageSource.gallery);
+
+                if (image != null) {
+                  setState(() {
+                    _profileImage = File(image.path);
+                  });
+                  // Here you can also implement the logic to upload the image to your server
+                }
               },
               child: const Text(
                 'Change Photo',
@@ -231,6 +247,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 hintText: 'Enter your phone number'),
             _buildTextField('Date Of Birth', _dateOfBirthController,
                 hintText: 'Enter your date of birth'),
+            _buildSectionTitle('Additional Information'),
+            _buildTextField('Location', _locationController,
+                hintText: 'Enter your location'),
+            _buildTextField('Language', _languageController,
+                hintText: 'Enter your language'),
             _buildSectionTitle('Privacy Settings'),
             SwitchListTile(
               title: const Text('Private Account'),

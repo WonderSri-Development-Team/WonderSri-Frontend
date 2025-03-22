@@ -6,6 +6,8 @@ import 'package:frontend/screens/user_profile/UserModel.dart';
 import 'package:frontend/screens/user_profile/UserProfile.dart';
 
 import 'package:frontend/screens/user_profile/changePassword_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -15,7 +17,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool isDarkMode = false;
   bool isNotificationsEnabled = false;
-
 
   get userModel => null;
 
@@ -73,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           phone: '+1234567890', // Replace with actual data
                           dateOfBirth: '01/01/1990', // Replace with actual data
                           gender: 'Male', // Replace with actual data
-                          location: 'New York', // Replace with actual data
+                          location: 'Sri Lanka ', // Replace with actual data
                           language: 'English', // Replace with actual data
                         );
 
@@ -152,24 +153,6 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             SizedBox(height: 25.0),
-            buildSettingTitle('App Preferences'),
-            buildSettingItem('Language', Icons.language),
-            //buildSettingItem('Dark Theme', Icons.color_lens),
-
-            buildSettingItem(
-              'Dark Theme',
-              Icons.color_lens,
-              switchValue: isDarkMode,
-              onSwitchChanged: (value) {
-                setState(() {
-                  isDarkMode = value;
-                  // Here you could also implement the actual theme change logic
-                });
-              },
-            ),
-            buildSettingItem('Location Services', Icons.location_on),
-            buildSettingItem('Currency', Icons.attach_money),
-            SizedBox(height: 25.0),
             buildSettingTitle('Support & Help'),
 
             buildSettingItem(
@@ -210,7 +193,8 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             SizedBox(height: 24.0),
             buildSettingTitle('App Information'),
-            buildSettingItem('About Us', Icons.info),
+            buildSettingItem('About Us', Icons.info,
+                url: 'https://wondersri-marketing.vercel.app'),
             buildSettingItem('Rate App', Icons.star),
             buildSettingItem('Share App', Icons.share),
             SizedBox(height: 24.0),
@@ -247,7 +231,10 @@ Widget buildSettingTitle(String title) {
 
 //create setting item
 Widget buildSettingItem(String title, IconData icon,
-    {VoidCallback? onTap, bool? switchValue, Function(bool)? onSwitchChanged}) {
+    {VoidCallback? onTap,
+    bool? switchValue,
+    Function(bool)? onSwitchChanged,
+    String? url}) {
   return ListTile(
     leading: Icon(
       icon,
@@ -271,6 +258,15 @@ Widget buildSettingItem(String title, IconData icon,
             size: 16.0,
             color: Colors.grey,
           ),
-    onTap: switchValue == null ? onTap : null,
+    onTap: switchValue == null
+        ? (url != null
+            ? () async {
+                if (await canLaunchUrl(Uri.parse(url))) {
+                  await launchUrl(Uri.parse(url),
+                      mode: LaunchMode.externalApplication);
+                }
+              }
+            : onTap)
+        : null,
   );
 }

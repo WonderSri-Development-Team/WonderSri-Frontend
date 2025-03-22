@@ -21,6 +21,9 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   List<Map<String, dynamic>> _activities = [];
   bool _isLoading = true;
 
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState(){
     super.initState();
@@ -44,6 +47,13 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
       }
     });
     _fetchFoodData();
+  }
+
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchFoodData() async {
@@ -117,9 +127,33 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   }
 
 
+  List<Map<String, dynamic>> _filterItems(List<Map<String, dynamic>> items, String query) {
+    if (query.isEmpty) {
+      return items;
+    }
+    return items.where((item) {
+      final title = item['title']?.toString().toLowerCase() ?? '';
+      final description = item['description']?.toString().toLowerCase() ?? '';
+      return title.contains(query.toLowerCase()) || description.contains(query.toLowerCase());
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+
+    final filteredFoods = _searchQuery.isEmpty ? _foods : _filterItems(_foods, _searchQuery);
+    final filteredEvents = _searchQuery.isEmpty ? _events : _filterItems(_events, _searchQuery);
+    final filteredActivities = _searchQuery.isEmpty ? _activities : _filterItems(_activities, _searchQuery);
+
+    // final filteredFoods = _filterItems(_foods, _searchQuery);
+    // final filteredEvents = _filterItems(_events, _searchQuery);
+    // final filteredActivities = _filterItems(_activities, _searchQuery);
+
+    print('Search Query: $_searchQuery');
+    print('Filtered Foods: $filteredFoods');
+    print('Filtered Events: $filteredEvents');
+    print('Filtered Activities: $filteredActivities');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Explorer'),
@@ -144,14 +178,31 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SearchBar(
+                hintText: 'Search for foods, activities, or events',
+                leading: const Icon(Icons.search),
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              ),
+            ),
+
             _buildSectionTitle("Popular Foods"),
-            _buildHorizontalList(_foods),
+            _buildHorizontalList(filteredFoods),
 
             _buildSectionTitle("Nearby Events"),
-            _buildHorizontalList(_events),
+            _buildHorizontalList(filteredEvents),
 
             _buildSectionTitle("Nearby Activities"),
-            _buildHorizontalList(_activities),
+            _buildHorizontalList(filteredActivities),
           ],
         ),
       ),
