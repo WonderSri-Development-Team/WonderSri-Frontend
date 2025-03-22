@@ -1,8 +1,18 @@
+
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../screens/sign_up.dart';
 import 'package:frontend/service/navigation_controller.dart';
 import 'package:frontend/service/api_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../service/ForgotPasswordPage.dart';
+import '../service/navigation_controller.dart';
+
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,32 +28,147 @@ class _LoginPageState extends State<LoginPage> {
 
   bool isLoading = false;
 
-  void _login() async {
+  Future<void> _login() async {
     setState(() {
-      isLoading = true;
+      isLoading = true; // Show loading indicator
     });
 
-    try {
-      final response = await apiService.login(
-        emailController.text,
-        passwordController.text,
-      );
-
-      // Save token if needed (e.g., SharedPreferences)
-
-      // Navigate to home page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => NavController()),
-      );
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login failed: ${error.toString()}")),
-      );
-    } finally {
+    if(emailController.text.isEmpty || passwordController.text.isEmpty){
+      _showDialog("Error", "Please fill in all fields!");
       setState(() {
-        isLoading = false;
+        isLoading = false; // Hide loading indicator
       });
+      return;
+    }
+
+    // backend URL for login
+    final String apiUrl = "https://wondersri-backend.onrender.com/auth/login";
+
+    try {
+      print("Sending login request...");
+      print("Email: ${emailController.text}");
+      print("Password: ${passwordController.text}");
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": emailController.text,
+          "password": passwordController.text,
+        }),
+      );
+
+      print("Login Response: ${response.statusCode}, Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print("User authenticated: ${responseData['token']}");
+
+        // Store the authentication token
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access_token', responseData['access']);
+        await prefs.setString('refresh_token', responseData['refresh']);
+
+        // Navigate to the home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NavController()),
+        );
+      } else if (response.statusCode == 400) {
+        _showDialog("Error", "Missing credentials. Please fill in all fields.");
+      } else if (response.statusCode == 401) {
+        _showDialog("Error", "Invalid email or password. Please try again.");
+      }
+      else {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print("Login Error: Login Failed");
+        _showDialog("Error", responseData["error"] ?? "Login failed.");
+      }
+    }catch(error){
+      print("Login Error: $error");
+      _showDialog("Error", "An error occurred. Please try again.");
+    }
+  }
+
+  void _showDialog(String title, String message, [VoidCallback? onOkPressed]) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onOkPressed != null) {
+                  onOkPressed();
+                }
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+  );
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      print("Starting google sign-in");
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        print("Google Sign-In canceled by user.");
+        return; // User canceled sign-in.
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        print("Failed to get Google ID Token");
+        throw Exception("Failed to get Google ID Token");
+      }
+
+      print("Google ID Token: $idToken");
+
+      // Send ID Token to your backend
+      final response = await http.post(
+        Uri.parse('https://wondersri-backend.onrender.com/auth/google-login/'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"id_token": idToken}),
+      );
+
+      print("Google Sign-In Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("User authenticated: ${data['token']}");
+
+        // Store the authentication token
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', data['token']);
+
+        // Navigate to the home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NavController()),
+        );
+      } else if (response.statusCode == 400) {
+        _showDialog("Error", "Invalid request. Please try again.");
+      } else if (response.statusCode == 401) {
+        _showDialog("Error", "Google Sign-In failed. Please try again.");
+      } else {
+        print("Failed to authenticate: ${response.body}");
+      }
+    } catch (error) {
+      print("Google Sign-In error: $error");
     }
   }
 
@@ -133,69 +258,57 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      // sign in Button
-                      ElevatedButton(
-                        // onPressed: isLoading ? null : _login,
-                        onPressed: () {
-                          // Navigate to SecondPage when button is clicked
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NavController()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          elevation: 10, // Adds a shadow
-                          backgroundColor: Color(0xFF2D46B9),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          minimumSize: const Size.fromHeight(50),
+                    // sign in Button
+                    ElevatedButton(
+                      onPressed: isLoading ? null : _login,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 10, // Adds a shadow
+                        backgroundColor: Color(0xFF2D46B9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        child: const Text(
-                          "Sign in",
-                          style: TextStyle(fontSize: 22, color: Colors.white),
-                        ),
+                        minimumSize: const Size.fromHeight(50),
                       ),
+                      child: const Text(
+                        "Sign in",
+                        style: TextStyle(fontSize: 22, color: Colors.white),
+                      ),
+                    ),
 
-                      SizedBox(height: size.height * 0.02),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            height: 2,
-                            width: size.width * 0.2,
-                            color: Colors.black45,
-                          ),
-                          Text(
+                    SizedBox(height: size.height * 0.02),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 2,
+                          width: size.width * 0.2,
+                          color: Colors.black45,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child:Text(
                             "  Or Sign in with  ",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black45,
-                                fontSize: 14),
+                                fontSize: 14
+                            ),
                           ),
-                          Container(
-                            height: 2,
-                            width: size.width * 0.2,
-                            color: Colors.black45,
-                          ),
-                        ],
-                      ),
+                        ),
+                        Container(
+                          height: 2,
+                          width: size.width * 0.2,
+                          color: Colors.black45,
+                        ),
+
+                      ],
+                    ),
 
                       // sign in options
                       SizedBox(height: size.height * 0.02),
 
                       ElevatedButton(
-                        // onPressed: isLoading ? null : _login,
-                        onPressed: () {
-                          // Navigate to SecondPage when button is clicked
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NavController()),
-                          );
-                        },
+                        onPressed: _handleGoogleSignIn,
                         style: ElevatedButton.styleFrom(
                           elevation: 10, // Adds a shadow
                           // backgroundColor: Color(tr),
@@ -225,18 +338,13 @@ class _LoginPageState extends State<LoginPage> {
                       ),
 
                       SizedBox(height: size.height * 0.02),
-
-                      Text.rich(
-                        TextSpan(
-                          text: "Don't have an account?",
-                          style: TextStyle(
-                            color: Colors.black45,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                      RichText(
+                        text: TextSpan(
+                          text: "Don't have an account? ",
+                          style: TextStyle(color: Colors.black45, fontSize: 14),
                           children: [
                             TextSpan(
-                              text: " Sign up",
+                              text: "Sign up",
                               style: TextStyle(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.bold,
@@ -246,15 +354,15 @@ class _LoginPageState extends State<LoginPage> {
                                 ..onTap = () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                        builder: (context) => SignUpPage()),
+                                    MaterialPageRoute(builder: (context) => SignUpPage()),
                                   );
                                 },
                             ),
                           ],
                         ),
                       ),
-                      // SizedBox(height: size.height * 0.02),
+
+                      SizedBox(height: size.height * 0.02),
                     ],
                   ),
                 ),
