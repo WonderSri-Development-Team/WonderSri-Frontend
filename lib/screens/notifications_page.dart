@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -8,26 +10,9 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  List<Map<String, String>> notifications = [
-    // {
-    //   'title': 'Event Nearby!',
-    //   'message': 'You are close to Galle Fort.',
-    //   'time': '2m ago',
-    //   'image': 'https://via.placeholder.com/50' // Replace with actual image URL
-    // },
-    // {
-    //   'title': 'New Tourist Spot',
-    //   'message': 'A new location has been added near you!',
-    //   'time': '10m ago',
-    //   'image': 'https://via.placeholder.com/50'
-    // },
-    // {
-    //   'title': 'Special Offer',
-    //   'message': 'Exclusive discounts at a nearby hotel.',
-    //   'time': '1h ago',
-    //   'image': 'https://via.placeholder.com/50'
-    // },
-  ];
+  List<Map<String, dynamic>> notifications = [];
+  Map<String, dynamic> schema = {}; // Store the schema
+  bool isLoading = true; // Track loading state
 
   @override
   void initState() {
@@ -36,14 +21,58 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> _loadNotifications() async {
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
+    // Fetch and load the schema first
+    await _fetchNotificationsSchema();
+
+    // Then load the notifications
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedNotifications = prefs.getString('notifications');
     if (storedNotifications != null) {
       setState(() {
         notifications =
-            List<Map<String, String>>.from(json.decode(storedNotifications));
+            List<Map<String, dynamic>>.from(json.decode(storedNotifications));
       });
     }
+    setState(() {
+      isLoading = false; // Hide loading indicator
+    });
+  }
+
+  Future<void> _fetchNotificationsSchema() async {
+    final response = await http.get(
+      Uri.parse(
+          'http://127.0.0.1:8000/api/notifications/get-notification-schema/'),
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        schema = json.decode(response.body);
+      });
+    } else {
+      print('Failed to fetch notifications schema');
+      // Handle error, e.g., by showing an error message
+    }
+  }
+
+  void _validateNotification(Map<String, dynamic> notification) {
+    // Check for required fields
+    for (var key in schema.keys) {
+      if (!notification.containsKey(key)) {
+        throw Exception('Missing required field: $key');
+      }
+    }
+
+    // Check for data types
+    for (var entry in schema.entries) {
+      if (notification[entry.key].runtimeType != entry.value.runtimeType) {
+        throw Exception('Invalid data type for field: ${entry.key}');
+      }
+    }
+
+    // If both checks pass, the notification is valid
+    print('Notification is valid!');
   }
 
   Future<void> _saveNotifications() async {
@@ -51,14 +80,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     await prefs.setString('notifications', json.encode(notifications));
   }
 
-  void _addNotification(String title, String message, String image) {
+  void _addNotification(Map<String, dynamic> notification) {
+    _validateNotification(notification); // Validate before adding
+
     setState(() {
-      notifications.insert(0, {
-        'title': title,
-        'message': message,
-        'image': image,
-        'time': DateTime.now().toLocal().toString().substring(0, 16),
-      });
+      // Ensure 'time' is added if not present in the notification
+      notification['time'] =
+          DateTime.now().toLocal().toString().substring(0, 16);
+      notifications.insert(0, notification);
     });
     _saveNotifications();
   }
@@ -75,23 +104,39 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Notifications")),
-      body: ListView.separated(
-        itemCount: notifications.length,
-        separatorBuilder: (context, index) => const Divider(),
-        itemBuilder: (context, index) {
-          final notification = notifications[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(notification['image']!),
-            ),
-            title: Text(notification['title']!,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(notification['message']!),
-            trailing: Text(notification['time']!,
-                style: const TextStyle(color: Colors.grey)),
-          );
-        },
-      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator()) // Show loading indicator
+          : notifications.isEmpty
+              ? const Center(
+                  child: Text('No notifications yet!'),
+                )
+              : ListView.separated(
+                  itemCount: notifications.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    // Format timestamp
+                    String formattedTime = DateFormat.yMMMd().add_jm().format(
+                          DateTime.parse(notification['timestamp']),
+                        );
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage:
+                            NetworkImage(notification['image'] ?? ''),
+                      ),
+                      title: Text(
+                        notification['title'] ?? '',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(notification['body'] ?? ''),
+                      trailing: Text(
+                        formattedTime,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    );
+                  },
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: _clearNotifications,
         backgroundColor: Colors.green,
