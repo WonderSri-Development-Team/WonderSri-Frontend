@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseNotification {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -68,30 +69,33 @@ class FirebaseNotification {
           ?.createNotificationChannel(channel);
 
       _isInitialized = true;
-    }
 
-    // Retrieve & Send FCM Token
-    final String? token = await _firebaseMessaging.getToken();
-    if (token != null) {
-      print('FCM Token: $token');
-      await _sendTokenToBackend(token);
+      // Send FCM token to backend
+      final String? token = await _firebaseMessaging.getToken();
+      if (token != null) {
+        print('FCM Token: $token');
+        await _sendTokenToBackend(token);
+      }
+
+      // Send a welcome notification (only once)
+      await _sendWelcomeNotification();
     }
 
     // Handle Notifications in Foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("New FCM Notification: ${message.notification?.title}");
 
-      // Show local notification when the app is in the foreground
+      // Show local notification and save it
       showNotification(
         title: message.notification?.title ?? 'New Notification',
         body: message.notification?.body ?? '',
+        image: message.notification?.android?.imageUrl ?? '',
       );
     });
 
     // Handle Notification Tap (When App is Terminated or in Background)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print("User opened notification: ${message.notification?.title}");
-      // Add logic to navigate the user based on notification data
     });
 
     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
@@ -119,7 +123,10 @@ class FirebaseNotification {
   }
 
   // SHOW LOCAL NOTIFICATION (When App is Open)
-  Future<void> showNotification({int id = 0, String? title, String? body}) async {
+  Future<void> showNotification({int id = 0, String? title, String? body, String? image}) async {
+    // Store the notification locally
+    await _saveNotification(title ?? "New Notification", body ?? "", image ?? "");
+
     return _flutterLocalNotificationsPlugin.show(
       id,
       title ?? "New Notification",
@@ -137,10 +144,43 @@ class FirebaseNotification {
     );
   }
 
-  // NOTIFICATION TAP HANDLER
-  final StreamController<String?> selectNotificationStream =
-  StreamController<String?>.broadcast();
+  // SEND WELCOME NOTIFICATION ON FIRST APP OPEN
+  Future<void> _sendWelcomeNotification() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenWelcome = prefs.getBool('hasSeenWelcome') ?? false;
 
-  static const MethodChannel platform =
-  MethodChannel('dexterx.dev/flutter_local_notifications_example');
+    if (!hasSeenWelcome) {
+      showNotification(
+        title: "Welcome to WonderSri!",
+        body: "Thanks for trying out our app. Enjoy your journey!",
+        image: "https://example.com/welcome-image.png",
+      );
+      await prefs.setBool('hasSeenWelcome', true);
+    }
+  }
+
+  // STORE NOTIFICATIONS LOCALLY
+  Future<void> _saveNotification(String title, String message, String image) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> notifications = prefs.getStringList('notifications') ?? [];
+
+    Map<String, String> newNotification = {
+      'title': title,
+      'message': message,
+      'image': image,
+      'time': DateTime.now().toLocal().toString().substring(0, 16),
+    };
+
+    notifications.insert(0, jsonEncode(newNotification));
+
+    await prefs.setStringList('notifications', notifications);
+  }
+
+  // RETRIEVE STORED NOTIFICATIONS
+  static Future<List<Map<String, String>>> getStoredNotifications() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> notifications = prefs.getStringList('notifications') ?? [];
+
+    return notifications.map((e) => Map<String, String>.from(jsonDecode(e))).toList();
+  }
 }
