@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:frontend/models/geofence.dart';
+import 'package:frontend/service/navigation_controller.dart';
 
 class MapScreen extends StatefulWidget{
 
@@ -237,7 +238,7 @@ class _MapScreenState extends State<MapScreen> {
         _alertShow = false; // Reset the alert flag
       });
       if(widget.destinations.isNotEmpty) {
-        _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLang']);
+        _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLng']);
       }
     } else {
       // All destinations reached
@@ -371,7 +372,7 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     if(widget.destinations.isNotEmpty) {
-      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLang']);
+      _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLng']);
     }
   }
 
@@ -381,6 +382,18 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Map Screen'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back), // Back arrow icon
+          onPressed: () {
+            // Custom navigation logic
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NavController(),
+              ),
+            );
+          },
+        ),
       ),
       body: _currentLocation == null
           ? Center(child: CircularProgressIndicator())
@@ -399,10 +412,10 @@ class _MapScreenState extends State<MapScreen> {
                         zoom: 15.0,
                       ),
                       markers: {
-                        if(widget.destinations[_currentDestinationIndex]['latLang'] != null)
+                        if(widget.destinations[_currentDestinationIndex]['latLng'] != null)
                           Marker(
                             markerId: MarkerId('destination'),
-                            position: widget.destinations[_currentDestinationIndex]['latLang'],
+                            position: widget.destinations[_currentDestinationIndex]['latLng'],
                           ),
                       },
                       polylines: _polylines,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/service/navigation_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:frontend/service/location_provider.dart';
@@ -120,7 +121,21 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Explorer')),
+      appBar: AppBar(
+        title: const Text('Explorer'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back), // Back arrow icon
+          onPressed: () {
+            // Custom navigation logic
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NavController(),
+            ),
+          );
+        },
+      ),
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _foods.isEmpty
