@@ -10,29 +10,30 @@ class QuickBookingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> quickBookings = [
       {
-        'title': 'Hotels',
-        'icon': Icons.hotel,
-        'url': 'https://www.wondersri.lk/hotels',
-      },
-      {
         'title': 'Boat Rides',
         'icon': Icons.directions_boat,
-        'url': 'https://www.wondersri.lk/boat-rides',
+        'url': 'https://www.wondersri.com/',
       },
       {
         'title': 'Fish Therapy',
         'icon': Icons.spa,
-        'url': 'https://www.wondersri.lk/fish-therapy',
+        'url': '',
       },
+      {
+        'title': 'Hotels',
+        'icon': Icons.hotel,
+        'url': '',
+      },
+
       {
         'title': 'Tours',
         'icon': Icons.tour,
-        'url': 'https://www.wondersri.lk/tours',
+        'url': '',
       },
       {
         'title': 'Activities',
         'icon': Icons.local_activity,
-        'url': 'https://www.wondersri.lk/activities',
+        'url': '',
       },
     ];
 
@@ -85,16 +86,33 @@ class QuickBookingButton extends StatelessWidget {
     required this.url,
   });
 
-  Future<void> _launchUrl() async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: _launchUrl,
+      onTap: () async {
+        try {
+          if (await canLaunch(url)) {
+            await launch(url);
+          } else {
+            // Show a banner (SnackBar) if the URL cannot be launched
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Sorry, this service is currently unavailable.'),
+                duration: Duration(seconds: 3), // Display for 3 seconds
+              ),
+            );
+          }
+        } catch (e) {
+          // Handle any unexpected errors
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An error occurred. Please try again later.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      },
       child: Container(
         width: 85,
         decoration: BoxDecoration(

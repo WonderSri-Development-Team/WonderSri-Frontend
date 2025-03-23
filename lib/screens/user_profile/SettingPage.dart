@@ -358,10 +358,23 @@ class _SettingsPageState extends State<SettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildSettingTitle('App Information'),
-        buildSettingItem(
-          'About Us',
-          Icons.info,
-          url: 'https://wondersri-marketing.vercel.app',
+        InkWell(
+          onTap: () async {
+            const url = 'https://wondersri-marketing.vercel.app/#team'; // Replace with your URL
+            if (await canLaunch(url)) {
+              await launch(url);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Could not launch the website.'),
+                ),
+              );
+            }
+          },
+          child: buildSettingItem(
+            'About Us',
+            Icons.info,
+          ),
         ),
         buildSettingItem('Rate App', Icons.star),
         buildSettingItem('Share App', Icons.share),

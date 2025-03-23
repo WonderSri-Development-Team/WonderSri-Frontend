@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../sign_in.dart';
 import 'UserModel.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -123,6 +124,54 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   }
 
+
+  Future<void> _deleteAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? accessToken = prefs.getString('access_token');
+
+    if (accessToken == null) {
+      throw Exception('No access token found');
+    }
+
+    final Uri url = Uri.parse('https://wondersri-backend-tracking.onrender.com/auth/delete-account');
+    final Map<String, String> headers = {
+    'Authorization': 'Bearer $accessToken',
+    'Content-Type': 'application/json',
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+      if (!mounted) return;
+
+      if (response.statusCode == 204) {
+      // Account deleted successfully
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Account deleted successfully')),
+      );
+      // Optionally, navigate to the login screen or home screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+      } else if (response.statusCode == 401) {
+      // Unauthorized
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unauthorized. Please log in again.')),
+        );
+      } else {
+        // Handle other errors
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete account. Please try again.')),
+          );
+      }
+    } catch (e) {
+      // Handle network or other errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: ${e.toString()}')),
+      );
+    }
+  }
+
+
   Widget _buildTextField(String label, TextEditingController controller,
       {bool isReadOnly = false, required String hintText}) {
     return Padding(
@@ -184,14 +233,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
-                        // Handle account deletion
+                        Navigator.of(context).pop(); // Close the dialog
+                        _deleteAccount();
                       },
                       child: Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red),
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
-                    ),
                   ],
                 );
               },

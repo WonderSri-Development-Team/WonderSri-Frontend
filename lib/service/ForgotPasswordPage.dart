@@ -14,20 +14,34 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future<void> _sendPasswordResetEmail() async {
     final String email = _emailController.text.trim();
+    print("$email");
 
     if (email.isEmpty) {
       _showDialog("Error", "Please enter your email address.");
       return;
     }
 
-    const String apiUrl = "https://wondersri-backend.onrender.com/auth/forgot-password/";
+    const String apiUrl = "https://wondersri-backend-tracking.onrender.com/auth/request-password-reset";
 
     try {
+      final requestBody = jsonEncode({
+        "email": email, // Corrected request format
+      });
+
+      print("Sending request to: $apiUrl");
+      print("Request body: $requestBody");
+
       final response = await http.post(
         Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email}),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: requestBody,
       );
+
+      print("Response status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
 
       if (response.statusCode == 200) {
         _showDialog("Success", "Password reset email sent. Please check your inbox.");
