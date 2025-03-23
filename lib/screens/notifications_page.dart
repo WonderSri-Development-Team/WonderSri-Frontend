@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -117,9 +118,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   itemBuilder: (context, index) {
                     final notification = notifications[index];
                     // Format timestamp
-                    String formattedTime = DateFormat.yMMMd().add_jm().format(
-                          DateTime.parse(notification['timestamp']),
-                        );
+                    String formattedTime = timeago.format(
+                        DateTime.parse(notification['timestamp']),
+                        locale: 'en');
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundImage:
