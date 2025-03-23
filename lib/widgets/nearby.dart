@@ -29,7 +29,7 @@ class _NearbyState extends State<Nearby> {
   void connectToWebSocket() {
     try {
       _channel = WebSocketChannel.connect(
-        Uri.parse('wss://wondersri-backend-6475.onrender.com/ws/location/'),
+        Uri.parse('wss://wondersri-backend-tracking.onrender.com/ws/location/'),
       );
 
       _channel.stream.listen((message) {

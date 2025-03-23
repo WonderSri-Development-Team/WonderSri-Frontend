@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     // backend URL for login
-    final String apiUrl = "https://wondersri-backend.onrender.com/auth/login";
+    final String apiUrl = "https://wondersri-backend-tracking.onrender.com/auth/login";
 
     try {
       print("Sending login request...");
@@ -64,10 +64,16 @@ class _LoginPageState extends State<LoginPage> {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print("User authenticated: ${responseData['token']}");
 
+        final String accessToken = responseData['access'];
+        final String refreshToken = responseData['refresh'];
+        final String userName = responseData['user']['first_name'];
+        final Map<String, dynamic> userData = responseData['user'];
+
         // Store the authentication token
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access_token', responseData['access']);
-        await prefs.setString('refresh_token', responseData['refresh']);
+        await prefs.setString('access_token', accessToken);
+        await prefs.setString('refresh_token', refreshToken);
+        await prefs.setString('userName', userName);
 
         // Navigate to the home screen
         Navigator.pushReplacement(
@@ -87,6 +93,10 @@ class _LoginPageState extends State<LoginPage> {
     }catch(error){
       print("Login Error: $error");
       _showDialog("Error", "An error occurred. Please try again.");
+    }finally {
+      setState(() {
+        isLoading = false; // Hide loading indicator
+      });
     }
   }
 
@@ -140,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // Send ID Token to your backend
       final response = await http.post(
-        Uri.parse('https://wondersri-backend.onrender.com/auth/google-login/'),
+        Uri.parse('https://wondersri-backend-tracking.onrender.com/auth/google-login/'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_token": idToken}),
       );
@@ -155,11 +165,12 @@ class _LoginPageState extends State<LoginPage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', data['token']);
 
+        // final userName = response.body['user']['first_name'];
         // Navigate to the home screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => NavController()),
-        );
+        // Navigator.pushReplacement(
+          // context,
+          // MaterialPageRoute(builder: (context) => NavController(userName: userName)),
+        // );
       } else if (response.statusCode == 400) {
         _showDialog("Error", "Invalid request. Please try again.");
       } else if (response.statusCode == 401) {
