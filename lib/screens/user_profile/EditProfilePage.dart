@@ -1,89 +1,126 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/user_profile/EditProfilePage.dart';
-import 'package:frontend/screens/user_profile/UserModel.dart' as model;
-
-import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'UserModel.dart';
 
-// User model - Move this to a separate models folder in a real app
-class User {
-  final String fullName;
-  final String username;
-  final String email;
-  final String phone;
-  final String dateOfBirth;
-  final String gender;
-  final String location;
-  final String language;
-
-  User({
-    required this.fullName,
-    required this.username,
-    required this.email,
-    required this.phone,
-    required this.dateOfBirth,
-    required this.gender,
-    required this.location,
-    required this.language,
-  });
-}
-
 class EditProfilePage extends StatefulWidget {
-  final model.User? user;
-  final model.UserModel? userModel; // Use model. namespace here too
+  final User user;
 
-  EditProfilePage({this.user, this.userModel});
+  const EditProfilePage({required this.user});
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  late TextEditingController _fullNameController;
+  bool _isPrivateAccount = false;
+  bool _isActivityStatusEnabled = false;
+
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _dateOfBirthController;
-  late TextEditingController _locationController;
-  late TextEditingController _languageController;
-
-  bool _isPrivateAccount = false;
-  bool _isActivityStatusEnabled = true;
-
   File? _profileImage;
+
 
   @override
   void initState() {
     super.initState();
-    // Initialize with user data if available
-    _fullNameController =
-        TextEditingController(text: widget.user?.fullName ?? '');
-    _usernameController =
-        TextEditingController(text: widget.user?.username ?? '');
-    _emailController = TextEditingController(text: widget.user?.email ?? '');
-    _phoneController = TextEditingController(text: widget.user?.phone ?? '');
-    _dateOfBirthController =
-        TextEditingController(text: widget.user?.dateOfBirth ?? '');
-    _locationController =
-        TextEditingController(text: widget.user?.location ?? '');
-    _languageController =
-        TextEditingController(text: widget.user?.language ?? '');
+    _firstNameController = TextEditingController(text: widget.user.firstName);
+    _lastNameController = TextEditingController(text: widget.user.lastName);
+    _usernameController = TextEditingController(text: widget.user.username);
+    _emailController = TextEditingController(text: widget.user.email);
+    _phoneController = TextEditingController(text: widget.user.phoneNumber ?? '');
+    _dateOfBirthController = TextEditingController(text: widget.user.dob ?? '');
   }
 
-  @override
-  void dispose() {
-    _fullNameController.dispose();
-    _usernameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _dateOfBirthController.dispose();
-    _locationController.dispose();
-    _languageController.dispose();
-    super.dispose();
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _profileImage = File(image.path);
+      });
+    }
+  }
+
+
+  Future<void> _updateProfile() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        throw Exception('No access token found');
+      }
+
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('https://wondersri-backend-tracking.onrender.com/auth/users/update-profile'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $accessToken';
+
+      request.fields['first_name'] = _firstNameController.text;
+      request.fields['last_name'] = _lastNameController.text;
+      request.fields['username'] = _usernameController.text;
+      request.fields['email'] = _emailController.text;
+      if (_phoneController.text.isNotEmpty) {
+        request.fields['phone_number'] = _phoneController.text;
+      }
+      if (_dateOfBirthController.text.isNotEmpty) {
+        request.fields['dob'] = _dateOfBirthController.text;
+      }
+
+      if (_profileImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'profile_picture',
+            _profileImage!.path,
+          ),
+        );
+      }
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        final Map<String, dynamic> data = json.decode(responseData);
+
+        // Update the user's profile data
+        final updatedUser = User(
+          id: widget.user.id,
+          firstName: data['profile']['first_name'],
+          lastName: data['profile']['last_name'],
+          username: data['profile']['username'],
+          email: data['profile']['email'],
+          phoneNumber: data['profile']['phone_number'],
+          dob: data['profile']['dob'],
+          profilePicture: data['profile']['profile_picture'],
+          user: data['profile']['user'],
+        );
+
+        // Return the updated user data
+        Navigator.pop(context, updatedUser);
+      } else {
+        final responseData = await response.stream.bytesToString();
+        print('Error Response: $responseData');
+        throw Exception('Failed to update profile');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating profile: $e')),
+      );
+    }
+
   }
 
   Widget _buildTextField(String label, TextEditingController controller,
@@ -177,6 +214,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // Default date (today)
+      firstDate: DateTime(1900), // Earliest selectable date
+      lastDate: DateTime.now(), // Latest selectable date (today)
+    );
+
+    if (picked != null) {
+      // Format the selected date as a string (e.g., "yyyy-MM-dd")
+      final formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+
+      // Update the date of birth controller
+      setState(() {
+        _dateOfBirthController.text = formattedDate;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,20 +241,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         backgroundColor: const Color(0xFF2D46B9),
         actions: [
           TextButton(
-            onPressed: () {
-              // Save and return updated user data
-              final updatedUser = User(
-                fullName: _fullNameController.text,
-                username: _usernameController.text,
-                email: _emailController.text,
-                phone: _phoneController.text,
-                dateOfBirth: _dateOfBirthController.text,
-                location: _locationController.text,
-                language: _languageController.text,
-                gender: '', // Add gender handling if needed
-              );
-              Navigator.pop(context, updatedUser);
-            },
+            onPressed: _updateProfile, // Call _updateProfile on save
             child: const Text(
               'Save',
               style: TextStyle(color: Colors.white),
@@ -212,31 +255,31 @@ class _EditProfilePageState extends State<EditProfilePage> {
           children: [
             CircleAvatar(
               radius: 40,
+              backgroundColor: Colors.grey[300], // Background color for the placeholder
               backgroundImage: _profileImage != null
                   ? FileImage(_profileImage!) as ImageProvider
-                  : const AssetImage('assets/profile_picture.png'),
+                  : widget.user.profilePicture != null
+                  ? NetworkImage(widget.user.profilePicture!)
+                  : null, // No default image
+              child: _profileImage == null && widget.user.profilePicture == null
+                  ? Icon(
+                Icons.person, // Placeholder icon
+                size: 40,
+                color: Colors.grey[600],
+              )
+                  : null,
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: () async {
-                // Add photo change functionality
-                final ImagePicker picker = ImagePicker();
-                final XFile? image =
-                    await picker.pickImage(source: ImageSource.gallery);
-
-                if (image != null) {
-                  setState(() {
-                    _profileImage = File(image.path);
-                  });
-                  // Here you can also implement the logic to upload the image to your server
-                }
-              },
+              onPressed: _pickImage,
               child: const Text(
                 'Change Photo',
                 style: TextStyle(color: Color(0xFF2D46B9)),
               ),
             ),
-            _buildTextField('Name', _fullNameController,
+            _buildTextField('First Name', _firstNameController,
+                hintText: 'Enter your name'),
+            _buildTextField('Last Name', _lastNameController,
                 hintText: 'Enter your name'),
             _buildTextField('Username', _usernameController,
                 hintText: 'Enter your username'),
@@ -245,13 +288,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 hintText: 'Enter your email'),
             _buildTextField('Phone Number', _phoneController,
                 hintText: 'Enter your phone number'),
-            _buildTextField('Date Of Birth', _dateOfBirthController,
-                hintText: 'Enter your date of birth'),
-            _buildSectionTitle('Additional Information'),
-            _buildTextField('Location', _locationController,
-                hintText: 'Enter your location'),
-            _buildTextField('Language', _languageController,
-                hintText: 'Enter your language'),
+            // _buildTextField('Date Of Birth', _dateOfBirthController,
+            //     hintText: 'Enter your date of birth'),
+            TextFormField(
+              controller: _dateOfBirthController,
+              readOnly: true, // Make the field read-only
+              decoration: InputDecoration(
+                labelText: 'Date of Birth (Optional)',
+                hintText: 'Select your date of birth',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(width: 1.5),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  onPressed: () => _selectDate(context), // Open the date picker
+                ),
+              ),
+            ),
+            // _buildSectionTitle('Additional Information'),
+            // _buildTextField('Location', "Sri Lanka" as TextEditingController,
+            //     hintText: 'Enter your location'),
+            // _buildTextField('Language', 'English' as TextEditingController,
+            //     hintText: 'Enter your language'),
             _buildSectionTitle('Privacy Settings'),
             SwitchListTile(
               title: const Text('Private Account'),

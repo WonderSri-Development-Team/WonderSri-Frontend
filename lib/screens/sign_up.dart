@@ -58,7 +58,7 @@ class _SignUpPageState extends State<SignUpPage>{
 
       // Send ID Token to your backend
       final response = await http.post(
-        Uri.parse('https://wondersri-backend.onrender.com/auth/google-login/'),
+        Uri.parse('https://wondersri-backend-tracking.onrender.com/auth/google-login/'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_token": idToken}),
       );
@@ -71,11 +71,13 @@ class _SignUpPageState extends State<SignUpPage>{
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', data['token']);
 
+        // final userName = response.body['user']['first_name'];
+
         // Navigate to the home screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => HomePage()),
+        // );
         
       } else {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -98,7 +100,7 @@ class _SignUpPageState extends State<SignUpPage>{
     }
 
     // backend URL for normal signup
-    final String apiUrl = "https://wondersri-backend.onrender.com/auth/signup/";
+    final String apiUrl = "https://wondersri-backend-tracking.onrender.com/auth/signup/";
 
     try {
       final response = await http.post(

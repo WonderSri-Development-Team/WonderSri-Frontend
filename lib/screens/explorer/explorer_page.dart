@@ -57,7 +57,7 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   }
 
   Future<void> _fetchFoodData() async {
-    final url = Uri.parse('https://wondersri-backend-1.onrender.com/location/foods'); // Update with your correct endpoint
+    final url = Uri.parse('https://wondersri-backend-tracking.onrender.com/location/foods'); // Update with your correct endpoint
 
     try {
       final response = await http.get(url);
@@ -82,7 +82,7 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   }
 
   Future<void> _fetchNearbyEvents(double latitude, double longitude) async {
-    final url = Uri.parse('https://wondersri-backend-1.onrender.com/location/nearby-events?lat=$latitude&lon=$longitude');
+    final url = Uri.parse('https://wondersri-backend-tracking.onrender.com/location/nearby-events?lat=$latitude&lon=$longitude');
 
     try {
       final response = await http.get(url);
@@ -100,7 +100,7 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   }
 
   Future<void> _fetchNearbyActivities(double latitude, double longitude) async {
-    final url = Uri.parse('https://wondersri-backend-1.onrender.com/location/nearby-activites?lat=$latitude&lon=$longitude');
+    final url = Uri.parse('https://wondersri-backend-tracking.onrender.com/location/nearby-activites?lat=$latitude&lon=$longitude');
 
     print("Fetching activities from: $url");
 

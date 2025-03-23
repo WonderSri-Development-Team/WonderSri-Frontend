@@ -108,7 +108,7 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           _currentLocation = newLocation;
         });
-        if (widget.destinations.isNotEmpty) {
+        if (_currentLocation!=null && widget.destinations.isNotEmpty) {
           _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLng']);
         }
       }
@@ -118,7 +118,7 @@ class _MapScreenState extends State<MapScreen> {
 
   // check the distance between user's live location and destinations location
   void _checkDistance(){
-    if(_currentLocation == null) return;
+    if(_currentLocation == null || widget.destinations.isEmpty) return;
 
     if(widget.destinations.isNotEmpty) {
       double distance = Geolocator.distanceBetween(
@@ -365,7 +365,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onShowDirectionsPressed() {
-    if (_currentLocation == null) return;
+    if (_currentLocation == null || widget.destinations.isEmpty) return;
 
     setState(() {
       _showInstructions = true; // Show instructions in the lower half
@@ -411,18 +411,26 @@ class _MapScreenState extends State<MapScreen> {
                         target: _currentLocation!,
                         zoom: 15.0,
                       ),
-                      markers: {
-                        if(widget.destinations[_currentDestinationIndex]['latLng'] != null)
-                          Marker(
-                            markerId: MarkerId('destination'),
-                            position: widget.destinations[_currentDestinationIndex]['latLng'],
-                          ),
-                      },
+                      // markers: {
+                      //   if(widget.destinations[_currentDestinationIndex]['latLng'] != null)
+                      //     Marker(
+                      //       markerId: MarkerId('destination'),
+                      //       position: widget.destinations[_currentDestinationIndex]['latLng'],
+                      //     ),
+                      // },
+                      markers: widget.destinations.isNotEmpty // Add this condition
+                          ? {
+                        Marker(
+                          markerId: MarkerId('destination'),
+                          position: widget.destinations[_currentDestinationIndex]['latLng'],
+                        ),
+                      }
+                          : {},
                       polylines: _polylines,
                       myLocationEnabled: true,
                       myLocationButtonEnabled: true,
                     ),
-                    if(!_showInstructions)
+                    if(!_showInstructions && widget.destinations.isNotEmpty)
                       Positioned(
                         bottom: 30, // Keep it visible on map
                         left: 70,
