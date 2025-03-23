@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/widgets/all_destination.dart';
 
 class PopularDestinationsSection extends StatelessWidget {
-  const PopularDestinationsSection({super.key});
+  final String searchQuery;
+  const PopularDestinationsSection({super.key,required this.searchQuery});
 
   static final List<Map<String, dynamic>> destinations = [
     {
@@ -217,6 +218,16 @@ class PopularDestinationsSection extends StatelessWidget {
     },
   ];
 
+  List<Map<String, dynamic>> get filteredDestinations {
+    if (searchQuery.isEmpty) {
+      return destinations;
+    } else {
+      return destinations.where((destination) {
+        return destination['name'].toLowerCase().contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -249,22 +260,14 @@ class PopularDestinationsSection extends StatelessWidget {
           ),
         ),
 
-
-
-
-
-
-
-
-
         SizedBox(
           height: 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: destinations.length,
+            itemCount: filteredDestinations.length,
             itemBuilder: (context, index) {
-              final destination = destinations[index];
+              final destination = filteredDestinations[index];
               return DestinationCard(
                 name: destination['name'],
                 image: destination['image'],

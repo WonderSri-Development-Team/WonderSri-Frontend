@@ -1,11 +1,13 @@
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/helpCenter.dart';
-import 'package:frontend/screens/user_profile/EditProfilePage.dart'
-    as editProfile;
+import 'package:frontend/screens/user_profile/EditProfilePage.dart' as editProfile;
 import 'package:frontend/screens/user_profile/UserModel.dart';
 import 'package:frontend/screens/user_profile/UserProfile.dart';
-
 import 'package:frontend/screens/user_profile/changePassword_screen.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -16,8 +18,103 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool isDarkMode = false;
   bool isNotificationsEnabled = false;
+  User? _user;
+  bool _isLoading = true;
+  String? _errorMessage;
 
-  get userModel => null;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile(); // Fetch user data when the page loads
+  }
+
+  Future<void> _fetchUserProfile() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        print('Access token is null');
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'No access token found. Please log in again.';
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No access token found. Please log in again.')),
+          );
+        }
+        return;
+      }
+
+      print('Settings page Access token: $accessToken');
+      final user = await fetchUserProfile(accessToken);
+
+      if (mounted) {
+        setState(() {
+          _user = user;
+          _isLoading = false;
+        });
+      }
+    } catch (error) {
+      print('Error fetching profile: $error');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to load profile data: $error';
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load profile data: $error')),
+        );
+      }
+    }
+  }
+
+  Future<User> fetchUserProfile(String accessToken) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://wondersri-backend-tracking.onrender.com/auth/users/get-profile'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
+      );
+
+      print('Response status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        print('Parsed response data: $responseData');
+        return User.fromJson(responseData);
+
+      } else if (response.statusCode == 401) {
+        // Token expired or invalid
+        print('Unauthorized: Token might be expired');
+        throw Exception('Session expired. Please log in again.');
+      } else {
+        print('Failed with status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to load profile data (${response.statusCode})');
+      }
+    } catch (e) {
+      print("Network error: $e");
+      throw Exception('Network error: $e');
+    }
+  }
+
+  void _retryFetchProfile() {
+    setState(() {
+      _errorMessage = null;
+    });
+    _fetchUserProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,176 +123,22 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text('Settings'),
         backgroundColor: Color(0xFF2D46B9),
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+          ? _buildErrorView()
+          : SingleChildScrollView(
         padding: EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30.0,
-                  backgroundColor: Color(0xFF2D46B9),
-                  child: Icon(
-                    Icons.person,
-                    size: 30.0,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(width: 16.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'John Doe',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2D46B9),
-                      ),
-                    ),
-                    Text(
-                      'User email ',
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    // In SettingsPage.dart
-                    TextButton(
-                      onPressed: () {
-                        // Create a User object with current user data
-                        final currentUser = User(
-                          fullName: 'John Doe', // Replace with actual data
-                          username: 'johndoe', // Replace with actual data
-                          email:
-                              'johndoe@example.com', // Replace with actual data
-                          phone: '+1234567890', // Replace with actual data
-                          dateOfBirth: '01/01/1990', // Replace with actual data
-                          gender: 'Male', // Replace with actual data
-                          location: 'Sri Lanka ', // Replace with actual data
-                          language: 'English', // Replace with actual data
-                        );
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => editProfile.EditProfilePage(
-                              user: currentUser,
-                              userModel: userModel,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Edit Profile',
-                        style: TextStyle(
-                          color: Color(0xFF2D46B9),
-                          fontSize: 12.0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            _buildUserProfileSection(),
             SizedBox(height: 25.0),
-            buildSettingTitle('Account Settings'),
-            buildSettingItem(
-              'Personal Information',
-              Icons.person,
-              onTap: () {
-                // Create a User object with current user data
-                final currentUser = User(
-                  fullName: 'John Doe', // Replace with actual user data
-                  username: 'johndoe',
-                  email: 'johndoe@example.com',
-                  phone: '+1234567890',
-                  dateOfBirth: '01/01/1990',
-                  gender: 'Male',
-                  location: 'New York',
-                  language: 'English',
-                );
-
-                // Navigate to the UserProfilePage
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserProfilePage(user: currentUser),
-                  ),
-                );
-              },
-            ),
-
-            //buildSettingItem('Password and Security', Icons.lock),
-            buildSettingItem(
-              'Password and Security',
-              Icons.lock,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ChangepasswordScreen()),
-                );
-              },
-            ),
-
-            buildSettingItem('Payments method ', Icons.payment),
-            buildSettingItem(
-              'Notification',
-              Icons.notifications,
-              switchValue: isNotificationsEnabled,
-              onSwitchChanged: (value) {
-                setState(() {
-                  isNotificationsEnabled = value;
-                });
-              },
-            ),
+            _buildAccountSettingsSection(),
             SizedBox(height: 25.0),
-            buildSettingTitle('Support & Help'),
-
-            buildSettingItem(
-              'Help Center',
-              Icons.help,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          HelpCenter()), // Navigate to HelpCenter
-                );
-              },
-            ),
-            buildSettingItem(
-              'Contact Support',
-              Icons.contact_support,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          HelpCenter()), // Navigate to HelpCenter
-                );
-              },
-            ),
-            buildSettingItem(
-              'Privacy Policy',
-              Icons.privacy_tip,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          HelpCenter()), // Navigate to HelpCenter
-                );
-              },
-            ),
+            _buildSupportAndHelpSection(),
             SizedBox(height: 24.0),
-            buildSettingTitle('App Information'),
-            buildSettingItem('About Us', Icons.info,
-                url: 'https://wondersri-marketing.vercel.app'),
-            buildSettingItem('Rate App', Icons.star),
-            buildSettingItem('Share App', Icons.share),
+            _buildAppInformationSection(),
             SizedBox(height: 24.0),
             Center(
               child: Text(
@@ -211,9 +154,236 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.red,
+            size: 60,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Error Loading Profile',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Text(
+              _errorMessage ?? 'An unknown error occurred',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+          ),
+          SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _retryFetchProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF2D46B9),
+            ),
+            child: Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserProfileSection() {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 30.0,
+          backgroundColor: Color(0xFF2D46B9),
+          backgroundImage: _user?.profilePicture != null && _user!.profilePicture!.isNotEmpty
+              ? NetworkImage(_user!.profilePicture!)
+              : null,
+          child: (_user?.profilePicture == null || _user!.profilePicture!.isEmpty)
+              ? Icon(
+            Icons.person,
+            size: 30.0,
+            color: Colors.white,
+          )
+              : null,
+        ),
+        SizedBox(width: 16.0),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _user?.firstName ?? 'User',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2D46B9),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                _user?.email ?? 'email@example.com',
+                style: TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.grey,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              TextButton(
+                onPressed: () {
+                  if (_user != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => editProfile.EditProfilePage(
+                          user: _user!,
+                        ),
+                      ),
+                    ).then((_) => _fetchUserProfile()); // Refresh after editing
+                  }
+                },
+                child: Text(
+                  'Edit Profile',
+                  style: TextStyle(
+                    color: Color(0xFF2D46B9),
+                    fontSize: 12.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountSettingsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildSettingTitle('Account Settings'),
+        buildSettingItem(
+          'Personal Information',
+          Icons.person,
+          onTap: () {
+            if (_user != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserProfilePage(),
+                ),
+              );
+            }
+          },
+        ),
+        buildSettingItem(
+          'Password and Security',
+          Icons.lock,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChangepasswordScreen(),
+              ),
+            );
+          },
+        ),
+        buildSettingItem('Payments method', Icons.payment),
+        buildSettingItem(
+          'Notification',
+          Icons.notifications,
+          switchValue: isNotificationsEnabled,
+          onSwitchChanged: (value) {
+            setState(() {
+              isNotificationsEnabled = value;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSupportAndHelpSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildSettingTitle('Support & Help'),
+        buildSettingItem(
+          'Help Center',
+          Icons.help,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HelpCenter(),
+              ),
+            );
+          },
+        ),
+        buildSettingItem(
+          'Contact Support',
+          Icons.contact_support,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HelpCenter(),
+              ),
+            );
+          },
+        ),
+        buildSettingItem(
+          'Privacy Policy',
+          Icons.privacy_tip,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HelpCenter(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAppInformationSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildSettingTitle('App Information'),
+        InkWell(
+          onTap: () async {
+            const url = 'https://wondersri-marketing.vercel.app/#team'; // Replace with your URL
+            if (await canLaunch(url)) {
+              await launch(url);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Could not launch the website.'),
+                ),
+              );
+            }
+          },
+          child: buildSettingItem(
+            'About Us',
+            Icons.info,
+          ),
+        ),
+        buildSettingItem('Rate App', Icons.star),
+        buildSettingItem('Share App', Icons.share),
+      ],
+    );
+  }
 }
 
-//create setting tittle
+// Helper methods
 Widget buildSettingTitle(String title) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
@@ -228,12 +398,8 @@ Widget buildSettingTitle(String title) {
   );
 }
 
-//create setting item
 Widget buildSettingItem(String title, IconData icon,
-    {VoidCallback? onTap,
-    bool? switchValue,
-    Function(bool)? onSwitchChanged,
-    String? url}) {
+    {VoidCallback? onTap, bool? switchValue, Function(bool)? onSwitchChanged, String? url}) {
   return ListTile(
     leading: Icon(
       icon,
@@ -248,24 +414,24 @@ Widget buildSettingItem(String title, IconData icon,
     ),
     trailing: switchValue != null
         ? Switch(
-            value: switchValue,
-            onChanged: onSwitchChanged,
-            activeColor: Color(0xFF2D46B9),
-          )
+      value: switchValue,
+      onChanged: onSwitchChanged,
+      activeColor: Color(0xFF2D46B9),
+    )
         : Icon(
-            Icons.arrow_forward_ios,
-            size: 16.0,
-            color: Colors.grey,
-          ),
+      Icons.arrow_forward_ios,
+      size: 16.0,
+      color: Colors.grey,
+    ),
     onTap: switchValue == null
         ? (url != null
-            ? () async {
-                if (await canLaunchUrl(Uri.parse(url))) {
-                  await launchUrl(Uri.parse(url),
-                      mode: LaunchMode.externalApplication);
-                }
-              }
-            : onTap)
+        ? () async {
+      final Uri uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+        : onTap)
         : null,
   );
 }

@@ -1,23 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/user_profile/EditProfilePage.dart' as edit;
-import 'package:frontend/screens/user_profile/UserModel.dart' as model;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:frontend/screens/user_profile/UserModel.dart';
+import 'EditProfilePage.dart' as editProfile;
 
 class UserProfilePage extends StatefulWidget {
-  final model.User user;
-
-  const UserProfilePage({super.key, required this.user});
-
   @override
   _UserProfilePageState createState() => _UserProfilePageState();
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  late model.User _user;
+  User? _user;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _user = widget.user; // Initialize with the logged-in user's data
+    _fetchUserProfile();
+  }
+
+  Future<void> _fetchUserProfile() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        print('Access token is null');
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'No access token found. Please log in again.';
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No access token found. Please log in again.')),
+          );
+        }
+        return;
+      }
+
+      print('Settings page Access token: $accessToken');
+      final user = await fetchUserProfile(accessToken);
+
+      if (mounted) {
+        setState(() {
+          _user = user;
+          _isLoading = false;
+        });
+      }
+    } catch (error) {
+      print('Error fetching profile: $error');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to load profile data: $error';
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load profile data: $error')),
+        );
+      }
+    }
+  }
+
+  Future<User> fetchUserProfile(String accessToken) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://wondersri-backend-tracking.onrender.com/auth/users/get-profile'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
+      );
+
+      print('Response status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        print('Parsed response data: $responseData');
+        return User.fromJson(responseData);
+
+      } else if (response.statusCode == 401) {
+        // Token expired or invalid
+        print('Unauthorized: Token might be expired');
+        throw Exception('Session expired. Please log in again.');
+      } else {
+        print('Failed with status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to load profile data (${response.statusCode})');
+      }
+    } catch (e) {
+      print("Network error: $e");
+      throw Exception('Network error: $e');
+    }
+  }
+
+  void _retryFetchProfile() {
+    setState(() {
+      _errorMessage = null;
+    });
+    _fetchUserProfile();
   }
 
   @override
@@ -40,7 +129,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
         actions: [
           TextButton(
             onPressed: () {
-              _navigateToEditProfile();
+              if (_user != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => editProfile.EditProfilePage(
+                      user: _user!,
+                    ),
+                  ),
+                ).then((_) => _fetchUserProfile()); // Refresh after editing
+              }
             },
             child: Text(
               'Edit',
@@ -53,7 +151,34 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body:  _isLoading
+          ? Center(child: CircularProgressIndicator()) // Show loading indicator
+          : _errorMessage != null
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Error Loading Profile',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _retryFetchProfile,
+              child: Text('Retry'),
+            ),
+          ],
+        ),
+      )
+      : SingleChildScrollView(
         child: Column(
           children: [
             // Profile Photo Section
@@ -69,14 +194,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.grey[300],
-                      image: _user.profilePhoto != null
+                      image: _user?.profilePicture != null
                           ? DecorationImage(
-                              image: NetworkImage(_user.profilePhoto!),
+                              image: NetworkImage(_user!.profilePicture!),
                               fit: BoxFit.cover,
                             )
                           : null,
                     ),
-                    child: _user.profilePhoto == null
+                    child: _user?.profilePicture == null
                         ? Icon(
                             Icons.person,
                             size: 60,
@@ -101,19 +226,35 @@ class _UserProfilePageState extends State<UserProfilePage> {
               child: Column(
                 children: [
                   buildProfileItemCard(
-                      'Full Name', _user.fullName, Icons.person_outline),
+                      'Full Name',
+                      _user != null
+                          ? '${_user!.firstName} ${_user!.lastName}'
+                          : 'Loading...',
+                      Icons.person_outline),
                   buildProfileItemCard(
-                      'Username', _user.username, Icons.person_outline),
+                      'Username',
+                      _user?.username ?? 'Loading...',
+                      Icons.person_outline),
                   buildProfileItemCard(
-                      'Email', _user.email, Icons.email_outlined),
+                      'Email',
+                      _user?.email ?? 'Loading...',
+                      Icons.email_outlined),
                   buildProfileItemCard(
-                      'Phone', _user.phone, Icons.phone_outlined),
-                  buildProfileItemCard('Date of Birth', _user.dateOfBirth,
+                      'Phone',
+                      _user?.phoneNumber ?? 'Not provided',
+                      Icons.phone_outlined),
+                  buildProfileItemCard(
+                      'Date of Birth',
+                      _user?.dob ?? 'Not provided',
                       Icons.calendar_today_outlined),
                   buildProfileItemCard(
-                      'Location', _user.location, Icons.location_on_outlined),
+                      'Location',
+                      "Sri Lanka",
+                      Icons.location_on_outlined),
                   buildProfileItemCard(
-                      'Language', _user.language, Icons.language_outlined,
+                      'Language',
+                      "English",
+                      Icons.language_outlined,
                       showDivider: false),
                 ],
               ),
@@ -179,27 +320,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  void _navigateToEditProfile() async {
-    // Navigate to the edit profile page and wait for the result
-    final updatedUser = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => edit.EditProfilePage(
-          user: _user,
-          userModel:
-              null, // It's okay to pass null here if your EditProfilePage handles it
-        ),
-      ),
-    );
-
-    // Update the user data if the profile was edited
-    if (updatedUser != null) {
-      // Update the user object
-      setState(() {
-        _user = updatedUser;
-      });
-    }
-  }
 
   void showDeleteAccount() {
     showDialog(

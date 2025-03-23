@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/service/navigation_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:frontend/service/location_provider.dart';
@@ -56,7 +57,7 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   }
 
   Future<void> _fetchFoodData() async {
-    final url = Uri.parse('https://wondersri-backend-1.onrender.com/location/foods'); // Update with your correct endpoint
+    final url = Uri.parse('https://wondersri-backend-tracking.onrender.com/location/foods'); // Update with your correct endpoint
 
     try {
       final response = await http.get(url);
@@ -81,7 +82,7 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   }
 
   Future<void> _fetchNearbyEvents(double latitude, double longitude) async {
-    final url = Uri.parse('https://wondersri-backend-1.onrender.com/location/nearby-events?lat=$latitude&lon=$longitude');
+    final url = Uri.parse('https://wondersri-backend-tracking.onrender.com/location/nearby-events?lat=$latitude&lon=$longitude');
 
     try {
       final response = await http.get(url);
@@ -99,7 +100,7 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
   }
 
   Future<void> _fetchNearbyActivities(double latitude, double longitude) async {
-    final url = Uri.parse('https://wondersri-backend-1.onrender.com/location/nearby-activites?lat=$latitude&lon=$longitude');
+    final url = Uri.parse('https://wondersri-backend-tracking.onrender.com/location/nearby-activites?lat=$latitude&lon=$longitude');
 
     print("Fetching activities from: $url");
 
@@ -154,7 +155,21 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
     print('Filtered Activities: $filteredActivities');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Explorer')),
+      appBar: AppBar(
+        title: const Text('Explorer'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back), // Back arrow icon
+          onPressed: () {
+            // Custom navigation logic
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NavController(),
+            ),
+          );
+        },
+      ),
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _foods.isEmpty

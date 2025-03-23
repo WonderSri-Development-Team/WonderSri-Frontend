@@ -26,23 +26,39 @@ class _SignUpPageState extends State<SignUpPage>{
     scopes: ['email'],
   );
 
+  bool _isLoading = false;
+
   Future<void> _handleGoogleSignIn() async {
+    if(_isLoading) return;
+    print("Starting Google Sign-In...");
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
+        print("Google Sign-In canceled by user.");
+        setState(() {
+          _isLoading = false;
+        });
         return; // User canceled sign-in.
       }
+
+      print("Google User: ${googleUser.email}");
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
+        print("Failed to get Google ID Token");
         throw Exception("Failed to get Google ID Token");
       }
 
       // Send ID Token to your backend
       final response = await http.post(
-        Uri.parse('https://wondersri-backend.onrender.com/auth/google-login/'),
+        Uri.parse('https://wondersri-backend-tracking.onrender.com/auth/google-login/'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_token": idToken}),
       );
@@ -55,14 +71,18 @@ class _SignUpPageState extends State<SignUpPage>{
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', data['token']);
 
+        // final userName = response.body['user']['first_name'];
+
         // Navigate to the home screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => HomePage()),
+        // );
         
       } else {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
         print("Failed to authenticate: ${response.body}");
+        _showDialog("Error", "An error occured during google sign up!");
       }
     } catch (error) {
       print("Google Sign-In error: $error");
@@ -70,33 +90,46 @@ class _SignUpPageState extends State<SignUpPage>{
   }
 
   Future<void> _signUp() async {
+    if (_usernameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _firstNameController.text.isEmpty ||
+        _lastNameController.text.isEmpty) {
+      _showDialog("Error", "Please fill in all fields.");
+      return;
+    }
+
     // backend URL for normal signup
-    final String apiUrl = "https://wondersri-backend.onrender.com/auth/signup/";
+    final String apiUrl = "https://wondersri-backend-tracking.onrender.com/auth/signup/";
 
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "username": _usernameController.text,
-        "email": _emailController.text,
-        "password": _passwordController.text,
-        "first_name": _firstNameController.text,
-        "last_name": _lastNameController.text,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "username": _usernameController.text,
+          "email": _emailController.text,
+          "password": _passwordController.text,
+          "first_name": _firstNameController.text,
+          "last_name": _lastNameController.text,
+        }),
+      );
 
-    if (response.statusCode == 201) {
-      _showDialog("Success", "Signup successful! Please verify your email.", () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) =>
-              LoginPage()),
-        );
-      });
-    } else {
-
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      _showDialog("Error", responseData["error"] ?? "Signup failed.");
+      if (response.statusCode == 201) {
+        _showDialog(
+            "Success", "Signup successful! Please verify your email.", () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) =>
+                LoginPage()),
+          );
+        });
+      } else {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        _showDialog("Error", responseData["error"] ?? "Signup failed.");
+      }
+    }catch(error){
+      _showDialog("Error", "An error occured. Please try again!");
     }
   }
 
