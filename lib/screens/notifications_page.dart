@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationsPage extends StatefulWidget {
+  const NotificationsPage({super.key});
+
   @override
   _NotificationsPageState createState() => _NotificationsPageState();
 }
@@ -25,7 +28,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       isLoading = true; // Show loading indicator
     });
     // Fetch and load the schema first
-    await _fetchNotificationsSchema();
+    // await _fetchNotificationsSchema();
 
     // Then load the notifications
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -43,10 +46,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Future<void> _fetchNotificationsSchema() async {
     final response = await http.get(
-      Uri.parse(
-          'http://127.0.0.1:8000/api/notifications/get-notification-schema/'),
+        Uri.parse(
+          '${dotenv.env['DJANGO_API_URL']!}/api/events/check-events/api/notifications/get-notification-schema/',
+        ),
     );
-    if (response.statusCode == 200) {
+        if (response.statusCode == 200) {
       setState(() {
         schema = json.decode(response.body);
       });

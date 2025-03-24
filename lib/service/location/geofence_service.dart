@@ -21,7 +21,7 @@ class GeofenceService {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
 
-      final apiUrl = dotenv.env['DJANGO_API_URL']! + "/api/events/check-events/";
+      final apiUrl = "${dotenv.env['DJANGO_API_URL']!}/api/events/check-events/";
 
       final response = await http.post(
         Uri.parse(apiUrl),

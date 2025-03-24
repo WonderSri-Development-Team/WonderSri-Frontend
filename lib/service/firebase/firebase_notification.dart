@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseNotification {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -38,11 +37,11 @@ class FirebaseNotification {
 
       // Android settings
       const AndroidInitializationSettings androidInitSettings =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
       // iOS settings
       const DarwinInitializationSettings iosInitSettings =
-      DarwinInitializationSettings(
+          DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true,
@@ -65,7 +64,7 @@ class FirebaseNotification {
       // Create Android notification channel
       await _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(channel);
 
       _isInitialized = true;
@@ -98,16 +97,19 @@ class FirebaseNotification {
       print("User opened notification: ${message.notification?.title}");
     });
 
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
       if (message != null) {
-        print("App launched by tapping notification: ${message.notification?.title}");
+        print(
+            "App launched by tapping notification: ${message.notification?.title}");
       }
     });
   }
 
   // SEND FCM TOKEN TO DJANGO
   Future<void> _sendTokenToBackend(String token) async {
-    final String apiUrl = dotenv.env['DJANGO_API_URL']! + "/api/notifications/register-device/";
+    final String apiUrl = "${dotenv.env['DJANGO_API_URL']!}/api/notifications/register-device/";
 
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -123,9 +125,11 @@ class FirebaseNotification {
   }
 
   // SHOW LOCAL NOTIFICATION (When App is Open)
-  Future<void> showNotification({int id = 0, String? title, String? body, String? image}) async {
+  Future<void> showNotification(
+      {int id = 0, String? title, String? body, String? image}) async {
     // Store the notification locally
-    await _saveNotification(title ?? "New Notification", body ?? "", image ?? "");
+    await _saveNotification(
+        title ?? "New Notification", body ?? "", image ?? "");
 
     return _flutterLocalNotificationsPlugin.show(
       id,
@@ -133,8 +137,10 @@ class FirebaseNotification {
       body ?? "",
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'high_importance_channel', 'High Importance Notifications',
-          channelDescription: 'This channel is used for important notifications.',
+          'high_importance_channel',
+          'High Importance Notifications',
+          channelDescription:
+              'This channel is used for important notifications.',
           importance: Importance.max,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
@@ -152,15 +158,18 @@ class FirebaseNotification {
     if (!hasSeenWelcome) {
       showNotification(
         title: "Welcome to WonderSri!",
-        body: "Thanks for trying out our app. Enjoy your journey!",
+        body:
+            "Thanks for trying out our app! Get ready to explore the wonders of Sri Lanka with WonderSri!",
         image: "https://example.com/welcome-image.png",
       );
+      _saveNotification("Welcome to WonderSri", "Thanks for trying out our app! Get ready to explore the wonders of Sri Lanka with WonderSri!", "https://example.com/welcome-image.png");
       await prefs.setBool('hasSeenWelcome', true);
     }
   }
 
   // STORE NOTIFICATIONS LOCALLY
-  Future<void> _saveNotification(String title, String message, String image) async {
+  Future<void> _saveNotification(
+      String title, String message, String image) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notifications = prefs.getStringList('notifications') ?? [];
 
@@ -181,6 +190,8 @@ class FirebaseNotification {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notifications = prefs.getStringList('notifications') ?? [];
 
-    return notifications.map((e) => Map<String, String>.from(jsonDecode(e))).toList();
+    return notifications
+        .map((e) => Map<String, String>.from(jsonDecode(e)))
+        .toList();
   }
 }
