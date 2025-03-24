@@ -128,13 +128,13 @@ class _MapScreenState extends State<MapScreen> {
         widget.destinations[_currentDestinationIndex]['latLng'].longitude,
       );
       if(distance <= 20){
-        _showArrivalPopup();
+        _showArrivalPopup(widget.destinations[_currentDestinationIndex]['name']);
       }
     }
   }
 
   // the location description screen
-  void _showLocationDescription(BuildContext context,String description) {
+  void _showLocationDescription(BuildContext context,String description,String name) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allows it to cover 3/4 of the screen
@@ -165,7 +165,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Hi there",
+                  name,
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
@@ -188,7 +188,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // when user reached to  location the alert will be shown, asking for to display the description of the location
-  void _showArrivalPopup() {
+  void _showArrivalPopup(String name) {
     if(!_alertShow) {
       setState(() {
         _alertShow = true;
@@ -197,7 +197,7 @@ class _MapScreenState extends State<MapScreen> {
         context: context,
         builder: (context) =>
             AlertDialog(
-              title: Text("You have arrived at"),
+              title: Text("You have arrived at ${name}"),
               content: Text("Would you like to know about this location?"),
               actions: [
                 TextButton(
@@ -214,9 +214,9 @@ class _MapScreenState extends State<MapScreen> {
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the alert
                     if(widget.destinations[_currentDestinationIndex]['description'].isNotEmpty) {
-                      _showLocationDescription(context, widget.destinations[_currentDestinationIndex]['description']);
+                      _showLocationDescription(context, widget.destinations[_currentDestinationIndex]['description'],widget.destinations[_currentDestinationIndex]['name']);
                     }else{
-                      _showLocationDescription(context, "No description available");
+                      _showLocationDescription(context, "No description available","No Name");
                     }
                     // setState(() {
                     //   _alertShow = false;
@@ -375,7 +375,19 @@ class _MapScreenState extends State<MapScreen> {
       _fetchAndDrawRoute(_currentLocation!, widget.destinations[_currentDestinationIndex]['latLng']);
     }
   }
-
+  //
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: AppBar(title: Text('Simple Map')),
+  //     body: GoogleMap(
+  //       initialCameraPosition: CameraPosition(
+  //         target: LatLng(37.422, -122.084), // Example location
+  //         zoom: 12,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -404,20 +416,11 @@ class _MapScreenState extends State<MapScreen> {
                 child: Stack(
                   children: [
                     GoogleMap(
-                      onMapCreated: (GoogleMapController controller) {
-                        mapController = controller;
-                      },
                       initialCameraPosition: CameraPosition(
-                        target: _currentLocation!,
-                        zoom: 15.0,
+                        target: _currentLocation!, // Example location
+                        zoom: 15,
                       ),
-                      // markers: {
-                      //   if(widget.destinations[_currentDestinationIndex]['latLng'] != null)
-                      //     Marker(
-                      //       markerId: MarkerId('destination'),
-                      //       position: widget.destinations[_currentDestinationIndex]['latLng'],
-                      //     ),
-                      // },
+
                       markers: widget.destinations.isNotEmpty // Add this condition
                           ? {
                         Marker(
@@ -426,10 +429,31 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                       }
                           : {},
-                      polylines: _polylines,
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
+                        polylines: _polylines,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
                     ),
+                    // GoogleMap(
+                    //   onMapCreated: (GoogleMapController controller) {
+                    //     mapController = controller;
+                    //   },
+                    //   initialCameraPosition: CameraPosition(
+                    //     target: _currentLocation!,
+                    //     zoom: 15.0,
+                    //   ),
+                    //
+                    //   markers: widget.destinations.isNotEmpty // Add this condition
+                    //       ? {
+                    //     Marker(
+                    //       markerId: MarkerId('destination'),
+                    //       position: widget.destinations[_currentDestinationIndex]['latLng'],
+                    //     ),
+                    //   }
+                    //       : {},
+                    //   polylines: _polylines,
+                    //   myLocationEnabled: true,
+                    //   myLocationButtonEnabled: true,
+                    // ),
                     if(!_showInstructions && widget.destinations.isNotEmpty)
                       Positioned(
                         bottom: 30, // Keep it visible on map
