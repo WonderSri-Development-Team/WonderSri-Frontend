@@ -282,7 +282,16 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         minimumSize: const Size.fromHeight(50),
                       ),
-                      child: const Text(
+                      child:isLoading
+                          ? SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 3,
+                        ),
+                      )
+                      : const Text(
                         "Sign in",
                         style: TextStyle(fontSize: 22, color: Colors.white),
                       ),

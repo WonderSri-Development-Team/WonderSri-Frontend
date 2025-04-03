@@ -231,7 +231,7 @@ class _SignUpPageState extends State<SignUpPage>{
 
                         // sign in Button
                         ElevatedButton(
-                          onPressed: _signUp,
+                          onPressed: _isLoading ? null : _signUp,
                           style: ElevatedButton.styleFrom(
                             elevation: 10, // Adds a shadow
                             backgroundColor: Color(0xFF2D46B9),
@@ -240,10 +240,19 @@ class _SignUpPageState extends State<SignUpPage>{
                             ),
                             minimumSize: const Size.fromHeight(50),
                           ),
-                          child: const Text(
-                            "Sign up",
-                            style: TextStyle(fontSize: 22, color: Colors.white),
-                          ),
+                          child: _isLoading
+                              ? SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              strokeWidth: 3,
+                            ),
+                          )
+                            :const Text(
+                              "Sign up",
+                              style: TextStyle(fontSize: 22, color: Colors.white),
+                            ),
                         ),
 
                         SizedBox(height: size.height * 0.02),
