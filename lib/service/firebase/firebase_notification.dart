@@ -109,7 +109,7 @@ class FirebaseNotification {
 
   // SEND FCM TOKEN TO DJANGO
   Future<void> _sendTokenToBackend(String token) async {
-    final String apiUrl = "${dotenv.env['DJANGO_API_URL']!}/api/notifications/register-device/";
+    final String apiUrl = "${dotenv.env['DJANGO_API_URL']!}/notifications/register-device/";
 
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -160,7 +160,7 @@ class FirebaseNotification {
         title: "Welcome to WonderSri!",
         body:
             "Thanks for trying out our app! Get ready to explore the wonders of Sri Lanka with WonderSri!",
-        image: "https://example.com/welcome-image.png",
+        image: "https://wondersri-media.s3.eu-north-1.amazonaws.com/Logo.png",
       );
       _saveNotification("Welcome to WonderSri", "Thanks for trying out our app! Get ready to explore the wonders of Sri Lanka with WonderSri!", "https://example.com/welcome-image.png");
       await prefs.setBool('hasSeenWelcome', true);

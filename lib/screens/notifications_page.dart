@@ -14,7 +14,7 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   List<Map<String, dynamic>> notifications = [];
-  Map<String, dynamic> schema = {}; // Store the schema
+  Map<String, Type> schema = {}; // Schema populated with data types from the backend
   bool isLoading = true; // Track loading state
 
   @override
@@ -23,12 +23,65 @@ class _NotificationsPageState extends State<NotificationsPage> {
     _loadNotifications();
   }
 
+  Future<Map<String, dynamic>> _fetchNotificationsSchema() async {
+    final response = await http.get(
+      Uri.parse(
+        '${dotenv.env['DJANGO_API_URL']!}/notifications/get-notification-schema/',
+      ),
+    );
+    if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedSchema = json.decode(response.body);
+        // Create the schema map, converting the type strings from the backend to actual Dart Types.
+
+        Map<String, Type> schema = {};
+        for (var key in decodedSchema.keys) {
+
+          switch (decodedSchema[key]) {
+            case 'str':
+            case 'string':
+              schema[key] = String;
+              break;
+            case 'int':
+              schema[key] = int;
+              break;
+            case 'bool':
+              schema[key] = bool;
+              break;
+            case 'double':
+              schema[key] = double;
+              break;
+            case 'datetime':
+              schema[key] = DateTime;
+              break;
+            case 'dict':
+            case 'map': // For consistency and if Django might send 'map'
+              schema[key] = Map<String, dynamic>;
+              break;
+            case 'list':
+              schema[key] = List<dynamic>;
+          // Add cases for other types as needed (e.g., dynamic if you don't want a specific check)
+            default:
+              schema[key] = dynamic; // Or handle the default case as needed
+          }
+        }
+        setState(() {
+          this.schema = schema;
+        });
+        return schema;
+
+    } else {
+      print('Failed to fetch notifications schema: ${response.statusCode}');
+      // Handle error, e.g., by showing an error message
+      return {};
+    }
+  }
+
   Future<void> _loadNotifications() async {
     setState(() {
       isLoading = true; // Show loading indicator
     });
     // Fetch and load the schema first
-    // await _fetchNotificationsSchema();
+    await _fetchNotificationsSchema();
 
     // Then load the notifications
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -44,21 +97,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
-  Future<void> _fetchNotificationsSchema() async {
-    final response = await http.get(
-        Uri.parse(
-          '${dotenv.env['DJANGO_API_URL']!}/api/events/check-events/api/notifications/get-notification-schema/',
-        ),
-    );
-        if (response.statusCode == 200) {
-      setState(() {
-        schema = json.decode(response.body);
-      });
-    } else {
-      print('Failed to fetch notifications schema');
-      // Handle error, e.g., by showing an error message
-    }
-  }
 
   void _validateNotification(Map<String, dynamic> notification) {
     // Check for required fields
@@ -104,44 +142,72 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
+  List<Map<String, dynamic>> notificationsHardcoded = [
+    {
+      'title': 'Event Nearby!',
+      'body': 'You are close to Galle Fort.',
+      'timestamp':
+          DateTime.now().subtract(Duration(minutes: 5)).toIso8601String(),
+      'image': '',
+    },
+    {
+      'title': 'New Tourist Spot',
+      'body': 'A new location has been added near you!',
+      'timestamp':
+          DateTime.now().subtract(Duration(minutes: 10)).toIso8601String(),
+      'image': '',
+    },
+    {
+      "type": "notification",
+      "title": "Welcome to WonderSri!",
+      "body": "Thanks for trying out our app! Get ready to explore the wonders of Sri Lanka.",
+      "timestamp": "2025-03-24T03:19:41Z",
+      'image': 'https://github.com/WonderSri-Development-Team/WonderSri/blob/main/public/Logo.png',
+      // "data": {
+      //   "eventId": null,
+      //   "location": null,
+      //   "read": false
+      // }
+    }
+    // Add more hardcoded notifications as needed
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Notifications")),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator()) // Show loading indicator
-          : notifications.isEmpty
-              ? const Center(
-                  child: Text('No notifications yet!'),
-                )
-              : ListView.separated(
-                  itemCount: notifications.length,
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemBuilder: (context, index) {
-                    final notification = notifications[index];
-                    // Format timestamp
-                    String formattedTime = timeago.format(
-                        DateTime.parse(notification['timestamp']),
-                        locale: 'en');
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(notification['image'] ?? ''),
-                      ),
-                      title: Text(
-                        notification['title'] ?? '',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(notification['body'] ?? ''),
-                      trailing: Text(
-                        formattedTime,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    );
-                  },
-                ),
-      floatingActionButton: FloatingActionButton(
+          ? const Center(child: CircularProgressIndicator())
+          : notificationsHardcoded.isEmpty // Directly use the list you're displaying
+          ? const Center(child: Text('No notifications yet!'))
+          : RefreshIndicator( // Good to keep the RefreshIndicator
+        onRefresh: _loadNotifications,
+        child: ListView.separated(
+          itemCount: notificationsHardcoded.length,
+          separatorBuilder: (context, index) => const Divider(),
+          itemBuilder: (context, index) {
+            final notification = notificationsHardcoded[index];
+            // Access notification fields, handling nulls
+            String title = notification['title'] ?? 'No Title';
+            String body = notification['body'] ?? '';
+            String image = notification['image'] ?? ''; // Default image or handle null
+            String timestampString = notification['timestamp'] ?? ''; // Handle potential missing timestamps
+            DateTime timestamp = DateTime.tryParse(timestampString) ?? DateTime.now(); // safely parse and provide default
+            String formattedTime = timeago.format(timestamp, locale: 'en');
+
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: image.isNotEmpty ? NetworkImage(image) : null, // Handle image if it exists
+              ),
+              title: Text(title),
+              subtitle: Text(body),
+              trailing: Text(formattedTime,
+                  style: const TextStyle(color: Colors.grey)),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton( // ... (your existing FAB)
         onPressed: _clearNotifications,
         backgroundColor: Colors.green,
         child: const Icon(Icons.close),
