@@ -113,7 +113,7 @@ class _StateExplorerScreen extends State<ExplorerScreen> {
       if (response.statusCode == 200) {
         List<Map<String, dynamic>> activitiesData = List<Map<String, dynamic>>.from(json.decode(response.body));
 
-        print("Parsed Activities: $activitiesData"); // ✅ Debugging line
+        print("Parsed Activities: $activitiesData"); // Debugging line
 
         setState(() {
           _activities = activitiesData;

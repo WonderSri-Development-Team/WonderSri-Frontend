@@ -39,11 +39,6 @@
             android:value="2" />
 
 
-        <!-- Required for location access on Android 10+ -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />

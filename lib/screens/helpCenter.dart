@@ -346,8 +346,8 @@ class _HelpCenterState extends State<HelpCenter> {
         const SizedBox(height: 16),
         _buildHelpItem(
             Icons.access_time, '24/7 Available', 'We\'re here to help anytime'),
-        _buildHelpItem(Icons.email, 'Email Support', 'wonderSri@gmail.com'),
-        _buildHelpItem(Icons.phone, 'Phone Support', '(+94)) 123-4567'),
+        _buildHelpItem(Icons.email, 'Email Support', 'wondersriservice@gmail.com'),
+        _buildHelpItem(Icons.phone, 'Phone Support', '(+94)) 74 285 1910'),
       ],
     );
   }

@@ -221,6 +221,20 @@ class _NearbyState extends State<Nearby> {
     }
   }
 
+  void _manualRefresh() {
+    if (_channel != null) {
+      _channel.sink.close(); // Close existing connection if any
+    }
+
+    setState(() {
+      _connectionStatus = 'Reconnecting...';
+      _isConnected = false;
+      _nearbyGeofences = [];
+    });
+
+    connectToWebSocket(); // Establish new connection
+  }
+
   @override
   void dispose() {
     _channel.sink.close();
@@ -255,6 +269,14 @@ class _NearbyState extends State<Nearby> {
               fontWeight: FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 10),
+          if (!_isConnected)
+            Center(
+              child: ElevatedButton(
+                onPressed: _manualRefresh,
+                child: const Text('Reconnect'),
+              ),
+            ),
           const SizedBox(height: 10),
           _nearbyGeofences.isEmpty
               ? const Center(child: Text('No nearby locations found'))

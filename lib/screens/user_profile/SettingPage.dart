@@ -120,7 +120,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text('Profile Settings'),
         backgroundColor: Color(0xFF2D46B9),
       ),
       body: _isLoading
@@ -199,18 +199,23 @@ class _SettingsPageState extends State<SettingsPage> {
     return Row(
       children: [
         CircleAvatar(
-          radius: 30.0,
-          backgroundColor: Color(0xFF2D46B9),
-          backgroundImage: _user?.profilePicture != null && _user!.profilePicture!.isNotEmpty
-              ? NetworkImage(_user!.profilePicture!)
-              : null,
-          child: (_user?.profilePicture == null || _user!.profilePicture!.isEmpty)
-              ? Icon(
+          radius: 40.0,
+          child: Icon(
             Icons.person,
             size: 30.0,
             color: Colors.white,
-          )
-              : null,
+          ),
+          // backgroundColor: Color(0xFF2D46B9),
+          // backgroundImage: _user?.profilePicture != null && _user!.profilePicture!.isNotEmpty
+          //     ? NetworkImage(_user!.profilePicture!)
+          //     : null,
+          // child: (_user?.profilePicture == null || _user!.profilePicture!.isEmpty)
+          //     ? Icon(
+          //   Icons.person,
+          //   size: 30.0,
+          //   color: Colors.white,
+          // )
+          //     : null,
         ),
         SizedBox(width: 16.0),
         Expanded(
@@ -218,9 +223,10 @@ class _SettingsPageState extends State<SettingsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _user?.firstName ?? 'User',
+                // _user?.firstName ?? 'User',
+                '${_user?.firstName ?? ''} ${_user?.lastName ?? 'User'}',
                 style: TextStyle(
-                  fontSize: 16.0,
+                  fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2D46B9),
                 ),
