@@ -14,7 +14,8 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   List<Map<String, dynamic>> notifications = [];
-  Map<String, Type> schema = {}; // Schema populated with data types from the backend
+  Map<String, Type> schema =
+      {}; // Schema populated with data types from the backend
   bool isLoading = true; // Track loading state
 
   @override
@@ -30,45 +31,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ),
     );
     if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedSchema = json.decode(response.body);
-        // Create the schema map, converting the type strings from the backend to actual Dart Types.
+      final Map<String, dynamic> decodedSchema = json.decode(response.body);
+      // Create the schema map, converting the type strings from the backend to actual Dart Types.
 
-        Map<String, Type> schema = {};
-        for (var key in decodedSchema.keys) {
-
-          switch (decodedSchema[key]) {
-            case 'str':
-            case 'string':
-              schema[key] = String;
-              break;
-            case 'int':
-              schema[key] = int;
-              break;
-            case 'bool':
-              schema[key] = bool;
-              break;
-            case 'double':
-              schema[key] = double;
-              break;
-            case 'datetime':
-              schema[key] = DateTime;
-              break;
-            case 'dict':
-            case 'map': // For consistency and if Django might send 'map'
-              schema[key] = Map<String, dynamic>;
-              break;
-            case 'list':
-              schema[key] = List<dynamic>;
+      Map<String, Type> schema = {};
+      for (var key in decodedSchema.keys) {
+        switch (decodedSchema[key]) {
+          case 'str':
+          case 'string':
+            schema[key] = String;
+            break;
+          case 'int':
+            schema[key] = int;
+            break;
+          case 'bool':
+            schema[key] = bool;
+            break;
+          case 'double':
+            schema[key] = double;
+            break;
+          case 'datetime':
+            schema[key] = DateTime;
+            break;
+          case 'dict':
+          case 'map': // For consistency and if Django might send 'map'
+            schema[key] = Map<String, dynamic>;
+            break;
+          case 'list':
+            schema[key] = List<dynamic>;
           // Add cases for other types as needed (e.g., dynamic if you don't want a specific check)
-            default:
-              schema[key] = dynamic; // Or handle the default case as needed
-          }
+          default:
+            schema[key] = dynamic; // Or handle the default case as needed
         }
-        setState(() {
-          this.schema = schema;
-        });
-        return schema;
-
+      }
+      setState(() {
+        this.schema = schema;
+      });
+      return schema;
     } else {
       print('Failed to fetch notifications schema: ${response.statusCode}');
       // Handle error, e.g., by showing an error message
@@ -97,7 +96,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
-
   void _validateNotification(Map<String, dynamic> notification) {
     // Check for required fields
     for (var key in schema.keys) {
@@ -108,11 +106,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     // Check for data types
     for (var entry in schema.entries) {
-      if (notification[entry.key].runtimeType != entry.value.runtimeType) {
-        throw Exception('Invalid data type for field: ${entry.key}');
+      if (notification[entry.key] == null && entry.value != Null) {
+        throw Exception('Invalid null value for field: ${entry.key}');
+      }
+      if (notification[entry.key] != null) {
+        if (notification[entry.key].runtimeType != entry.value) {
+          throw Exception('Invalid data type for field: ${entry.key}');
+        }
       }
     }
-
     // If both checks pass, the notification is valid
     print('Notification is valid!');
   }
@@ -127,7 +129,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     setState(() {
       // Ensure 'time' is added if not present in the notification
-      notification['time'] =
+      notification['timestamp'] =
           DateTime.now().toLocal().toString().substring(0, 16);
       notifications.insert(0, notification);
     });
@@ -144,32 +146,41 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   List<Map<String, dynamic>> notificationsHardcoded = [
     {
+      'type': 'event',
       'title': 'Event Nearby!',
       'body': 'You are close to Galle Fort.',
       'timestamp':
           DateTime.now().subtract(Duration(minutes: 5)).toIso8601String(),
-      'image': '',
+      'data': {},
+      'image': 'https://wondersri-media.s3.eu-north-1.amazonaws.com/Logo.png',
+      'read': false,
     },
     {
+      'type': 'spot',
       'title': 'New Tourist Spot',
       'body': 'A new location has been added near you!',
       'timestamp':
           DateTime.now().subtract(Duration(minutes: 10)).toIso8601String(),
-      'image': '',
+      'data': {},
+      'image': 'https://wondersri-media.s3.eu-north-1.amazonaws.com/Logo.png',
+      'read': false,
     },
     {
-      "type": "notification",
+      "type": "general",
       "title": "Welcome to WonderSri!",
-      "body": "Thanks for trying out our app! Get ready to explore the wonders of Sri Lanka.",
-      "timestamp": "2025-03-24T03:19:41Z",
-      'image': 'https://github.com/WonderSri-Development-Team/WonderSri/blob/main/public/Logo.png',
+      "body":
+          "Thanks for trying out our app! Get ready to explore the wonders of Sri Lanka.",
+      'data': {},
       // "data": {
       //   "eventId": null,
       //   "location": null,
       //   "read": false
       // }
+      "timestamp": DateTime.now().toIso8601String(),
+      'image':
+          'https://github.com/WonderSri-Development-Team/WonderSri/blob/main/public/Logo.png',
+      'read': false,
     }
-    // Add more hardcoded notifications as needed
   ];
 
   @override
@@ -178,36 +189,45 @@ class _NotificationsPageState extends State<NotificationsPage> {
       appBar: AppBar(title: const Text("Notifications")),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : notificationsHardcoded.isEmpty // Directly use the list you're displaying
-          ? const Center(child: Text('No notifications yet!'))
-          : RefreshIndicator( // Good to keep the RefreshIndicator
-        onRefresh: _loadNotifications,
-        child: ListView.separated(
-          itemCount: notificationsHardcoded.length,
-          separatorBuilder: (context, index) => const Divider(),
-          itemBuilder: (context, index) {
-            final notification = notificationsHardcoded[index];
-            // Access notification fields, handling nulls
-            String title = notification['title'] ?? 'No Title';
-            String body = notification['body'] ?? '';
-            String image = notification['image'] ?? ''; // Default image or handle null
-            String timestampString = notification['timestamp'] ?? ''; // Handle potential missing timestamps
-            DateTime timestamp = DateTime.tryParse(timestampString) ?? DateTime.now(); // safely parse and provide default
-            String formattedTime = timeago.format(timestamp, locale: 'en');
+          : notifications
+                  .isEmpty // Directly use the list you're displaying
+              ? const Center(child: Text('No notifications yet!'))
+              : RefreshIndicator(
+                  // Good to keep the RefreshIndicator
+                  onRefresh: _loadNotifications,
+                  child: ListView.separated(
+                    itemCount: notifications.length,
+                    separatorBuilder: (context, index) => const Divider(),
+                    itemBuilder: (context, index) {
+                      final notification = notifications[index];
+                      // Access notification fields, handling nulls
+                      String title = notification['title'] ?? 'No Title';
+                      String body = notification['body'] ?? '';
+                      String image = notification['image'] ??
+                          ''; // Default image or handle null
+                      String timestampString = notification['timestamp'] ??
+                          ''; // Handle potential missing timestamps
+                      DateTime timestamp = DateTime.tryParse(timestampString) ??
+                          DateTime.now(); // safely parse and provide default
+                      String formattedTime =
+                          timeago.format(timestamp, locale: 'en');
 
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: image.isNotEmpty ? NetworkImage(image) : null, // Handle image if it exists
-              ),
-              title: Text(title),
-              subtitle: Text(body),
-              trailing: Text(formattedTime,
-                  style: const TextStyle(color: Colors.grey)),
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton( // ... (your existing FAB)
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: image.isNotEmpty
+                              ? NetworkImage(image)
+                              : null, // Handle image if it exists
+                        ),
+                        title: Text(title),
+                        subtitle: Text(body),
+                        trailing: Text(formattedTime,
+                            style: const TextStyle(color: Colors.grey)),
+                      );
+                    },
+                  ),
+                ),
+      floatingActionButton: FloatingActionButton(
+        // ... (your existing FAB)
         onPressed: _clearNotifications,
         backgroundColor: Colors.green,
         child: const Icon(Icons.close),
