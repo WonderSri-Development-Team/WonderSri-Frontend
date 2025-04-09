@@ -19,7 +19,7 @@ dependencies {
 }
 
 def getMapsApiKey() {
-    def envFile = file("E:/L5/SDGP Implementation/WonderSri-Frontend/.env")
+    def envFile = file("D:/Education/IIT/Y2 Sem 1/5COSC021C SDGP/WonderSri/WonderSri-Frontend/.env")
     if (envFile.exists()) {
         def env = new groovy.util.ConfigSlurper().parse(envFile.text)
         return env.MAPS_API_KEY
