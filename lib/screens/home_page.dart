@@ -1,117 +1,79 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'notifications_page.dart'; // Import the notifications page
+import 'package:frontend/widgets/nearby.dart';
+import 'package:frontend/widgets/nearby_location.dart';
+import 'package:frontend/widgets/popular_destinations.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/widgets/quick_bokking.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../service/location_provider.dart';
+import '../widgets/nearby.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+
   const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>{
+class _HomeScreenState extends State<HomePage> {
+  String searchQuery = '';
+  late SharedPreferences prefs;
+  String? userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('userName');
+    });
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      searchQuery = query;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
+    final locationProvider = Provider.of<LocationProvider>(context);
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: size.height * 0.04),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                // here fetch user's name--------------------------------------------------------
-                children: [
-                  const Text(
-                    "Hi John,",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => NotificationsPage(),
-                            ),
-                          );
-                        },
-                        child: Stack(
-                          children: [
-                            const Icon(Icons.notifications_outlined,
-                                size: 30, color: Color(0xFF2D46B9)),
-                            Positioned(
-                              top: 2,
-                              right: 2,
-                              child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      const Icon(Icons.settings,
-                          size: 30, color: Color(0xFF2D46B9)),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: size.height * 0.02),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: const BorderSide(
-                            color: Color(0xFF2D46B9), width: 2)),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 10),
-                  ),
-                ),
-              ),
-              SizedBox(height: size.height * 0.02),
-              Text(
-                "You are currently in",
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              SizedBox(height: size.height * 0.02),
-            ],
+      appBar: AppBar(
+        title: Text('Hi ${userName ?? 'There'}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {},
           ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SearchBar(
+                hintText: 'Search for popular destinations',
+                leading: const Icon(Icons.search),
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+                onChanged: _onSearchChanged,
+              ),
+            ),
+            const QuickBookingSection(),
+            PopularDestinationsSection(searchQuery: searchQuery),
+            const Nearby()
+          ],
         ),
       ),
     );

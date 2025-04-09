@@ -1,34 +1,37 @@
-
-
 class User {
-  final String fullName;
+  final int id;
+  final String firstName;
+  final String lastName;
   final String username;
   final String email;
-  final String phone;
-  final String dateOfBirth;
-  final String gender; // Added gender field
-  final String location;
-  final String language;
+  final String? profilePicture;
+  final String? dob;
+  final String? phoneNumber;
+  final int user;
 
   User({
-    required this.fullName,
+    required this.id,
+    required this.firstName,
+    required this.lastName,
     required this.username,
     required this.email,
-    required this.phone,
-    required this.dateOfBirth,
-    required this.gender, // Added gender field
-    required this.location,
-    required this.language,
+    this.profilePicture,
+    this.dob,
+    this.phoneNumber,
+    required this.user,
   });
-  final User user = User(
-    fullName: '',
-    username: '',
-    email: '',
-    phone: '',
-    dateOfBirth: '',
-    location: '',
-    language: '',
-    gender: '',
-  );
 
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      firstName: json['first_name'],
+      lastName: json['last_name'],
+      username: json['username'],
+      email: json['email'],
+      profilePicture: json['profile_picture'],
+      dob: json['dob'],
+      phoneNumber: json['phone_number'],
+      user: json['user'],
+    );
+  }
 }

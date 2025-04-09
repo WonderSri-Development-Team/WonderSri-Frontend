@@ -1,3 +1,5 @@
+
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -16,6 +18,16 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 }
 
+def getMapsApiKey() {
+    def envFile = file("E:/L5/SDGP Implementation/WonderSri-Frontend/.env")
+    if (envFile.exists()) {
+        def env = new groovy.util.ConfigSlurper().parse(envFile.text)
+        return env.MAPS_API_KEY
+    } else {
+        throw new GradleException("Missing .env file!")
+    }
+}
+
 android {
     namespace = "com.example.frontend"
     compileSdk 35
@@ -32,6 +44,10 @@ android {
         jvmTarget = 17
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.wondersri"
@@ -41,6 +57,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        manifestPlaceholders = [
+                MAPS_API_KEY: getMapsApiKey(), // Your existing placeholder
+                applicationName: "android.app.Application" // Add this line
+        ]
+
     }
 
     buildTypes {

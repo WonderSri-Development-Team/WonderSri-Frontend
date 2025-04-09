@@ -1,35 +1,41 @@
 import 'dart:async';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:frontend/screens/home_page.dart';
-import 'package:frontend/screens/sign_in.dart';
-import 'package:frontend/screens/notifications_page.dart';
-import 'package:frontend/service/firebase/firebase_notification.dart';
-import 'package:frontend/service/location/geofence_service.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'screens/sign_in.dart';
+import 'service/firebase/firebase_notification.dart';
+import 'service/location/geofence_service.dart';
+import 'service/location_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables
-  await dotenv.load();
+  await dotenv.load(fileName: ".env");
 
   // Initialize Firebase
   await _initializeFirebase();
 
-  // Fetch user's FCM token (should be retrieved dynamically in a real app)
-  String? fcmToken = await FirebaseMessaging.instance
-      .getToken(); // Replace with actual token retrieval
+  // Fetch user's FCM token
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
 
-  // Check for nearby events every 10 minutes
   if (fcmToken != null) {
     Timer.periodic(Duration(minutes: 10), (Timer t) {
-      GeofenceService.checkNearbyEvents(fcmToken!);
+      GeofenceService.checkNearbyEvents(fcmToken);
     });
   }
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -38,19 +44,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/',
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case '/':
-            return MaterialPageRoute(builder: (context) => const LoginPage());
-          case '/home':
-            return MaterialPageRoute(builder: (context) => const HomePage());
-          case '/notifications':
-            return MaterialPageRoute(builder: (context) => NotificationsPage());
-          default:
-            return null;
-        }
-      },
+      debugShowCheckedModeBanner: false,
+      home: const LoginPage(),
     );
   }
 }
